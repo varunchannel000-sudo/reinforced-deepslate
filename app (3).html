@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Civics</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF7F2; --warm-white: #FEFCF9; --ink: #1A1410; --ink-muted: #5C4F42;
+    --ink-light: #9C8E82; --accent: #C4703A; --accent-light: #E8A97A; --accent-pale: #F5E6D8;
+    --sage: #7B9E87; --sage-pale: #E8F0EB; --border: rgba(92,79,66,0.15);
+    --shadow: 0 4px 24px rgba(26,20,16,0.08); --shadow-lg: 0 12px 48px rgba(26,20,16,0.14);
+    --radius: 16px; --radius-sm: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
+
+  /* LOGIN */
+  #login-page { min-height: 100vh; display: flex; align-items: stretch; position: relative; z-index: 1; }
+  .login-left { flex: 1; background: var(--ink); display: flex; flex-direction: column; justify-content: center; padding: 72px 64px; position: relative; overflow: hidden; }
+  .login-left::before { content: ''; position: absolute; top: -120px; right: -120px; width: 400px; height: 400px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity: .25; border-radius: 50%; }
+  .login-left::after { content: ''; position: absolute; bottom: -80px; left: -80px; width: 300px; height: 300px; background: radial-gradient(circle, var(--sage) 0%, transparent 70%); opacity: .2; border-radius: 50%; }
+  .login-brand { position: relative; z-index: 2; }
+  .login-brand .logo-mark { width: 52px; height: 52px; background: var(--accent); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 48px; font-family: 'Playfair Display', serif; font-size: 17px; color: white; font-weight: 700; }
+  .login-brand h1 { font-family: 'Playfair Display', serif; font-size: 52px; color: var(--warm-white); line-height: 1.1; margin-bottom: 20px; }
+  .login-brand h1 em { color: var(--accent-light); font-style: italic; }
+  .login-brand p { color: var(--ink-light); font-size: 16px; line-height: 1.7; max-width: 340px; font-weight: 300; }
+  .login-right { width: 480px; background: var(--warm-white); display: flex; flex-direction: column; justify-content: center; padding: 72px 56px; }
+  .login-right h2 { font-family: 'Playfair Display', serif; font-size: 32px; margin-bottom: 8px; }
+  .login-right .subtitle { color: var(--ink-light); font-size: 14px; margin-bottom: 40px; font-weight: 300; }
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 8px; }
+  .form-group input { width: 100%; padding: 14px 18px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--ink); background: var(--cream); outline: none; transition: border-color .2s, box-shadow .2s; }
+  .form-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(196,112,58,.12); }
+  .form-group input::placeholder { color: var(--ink-light); }
+  .error-msg { background: #FDECEA; border: 1px solid #F5C6BF; color: #C0392B; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; margin-bottom: 20px; display: none; }
+  .error-msg.show { display: block; }
+  .btn-primary { width: 100%; padding: 15px; background: var(--ink); color: var(--warm-white); border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .2s, transform .1s; letter-spacing: .02em; margin-top: 8px; }
+  .btn-primary:hover { background: #2E251E; }
+  .btn-primary:active { transform: scale(.99); }
+
+  /* APP SHELL */
+  #app-page { display: none; min-height: 100vh; position: relative; z-index: 1; }
+  .app-bar { height: 64px; background: var(--warm-white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 32px; position: sticky; top: 0; z-index: 100; }
+  .app-bar .brand { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--ink); margin-right: auto; display: flex; align-items: center; gap: 10px; }
+  .app-bar .brand span { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; font-weight: 700; }
+  .nav-tabs { display: flex; gap: 4px; background: var(--cream); padding: 4px; border-radius: var(--radius-sm); margin-right: 20px; }
+  .nav-tab { padding: 7px 18px; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--ink-muted); cursor: pointer; border-radius: 7px; transition: all .2s; }
+  .nav-tab.active { background: var(--warm-white); color: var(--ink); box-shadow: var(--shadow); }
+  .nav-tab:hover:not(.active) { color: var(--ink); }
+  .user-pill { display: flex; align-items: center; gap: 8px; margin-right: 16px; }
+  .user-avatar-sm { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-pale); color: var(--accent); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .user-name-sm { font-size: 13px; font-weight: 500; color: var(--ink-muted); }
+  .logout-btn { padding: 8px 16px; background: transparent; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink-muted); cursor: pointer; transition: all .2s; }
+  .logout-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .page { display: none; padding: 48px 64px; max-width: 1100px; margin: 0 auto; }
+  .page.active { display: block; }
+  .page-header { margin-bottom: 40px; }
+  .page-header h2 { font-family: 'Playfair Display', serif; font-size: 40px; }
+  .page-header p { color: var(--ink-light); font-size: 15px; margin-top: 6px; font-weight: 300; }
+
+  /* TODO */
+  .todo-add-row { display: flex; gap: 12px; margin-bottom: 32px; }
+  .todo-add-row input { flex: 1; padding: 14px 20px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 15px; background: var(--warm-white); color: var(--ink); outline: none; transition: border-color .2s, box-shadow .2s; }
+  .todo-add-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(196,112,58,.1); }
+  .todo-add-row input::placeholder { color: var(--ink-light); }
+  .btn-add { padding: 14px 28px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .2s, transform .1s; white-space: nowrap; }
+  .btn-add:hover { background: #B5602E; }
+  .btn-add:active { transform: scale(.98); }
+  .stat-row { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
+  .stat-chip { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+  .sc-total { background: var(--cream); color: var(--ink-muted); border: 1px solid var(--border); }
+  .sc-done { background: var(--sage-pale); color: var(--sage); }
+  .sc-left { background: var(--accent-pale); color: var(--accent); }
+  .todo-list { display: flex; flex-direction: column; gap: 10px; }
+  .todo-item { display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: var(--warm-white); border: 1.5px solid var(--border); border-radius: var(--radius-sm); transition: all .25s; animation: slideIn .25s ease; position: relative; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .todo-item:hover { border-color: rgba(196,112,58,.3); box-shadow: var(--shadow); }
+  .todo-item.done { opacity: .55; }
+  .todo-item.done .todo-text { text-decoration: line-through; color: var(--ink-light); }
+  .todo-checkbox { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 6px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .todo-checkbox:hover { border-color: var(--accent); }
+  .todo-item.done .todo-checkbox { background: var(--sage); border-color: var(--sage); }
+  .todo-checkbox svg { display: none; }
+  .todo-item.done .todo-checkbox svg { display: block; }
+  .todo-text-wrap { flex: 1; min-width: 0; }
+  .todo-text { font-size: 15px; color: var(--ink); }
+  .todo-meta { font-size: 11px; color: var(--ink-light); margin-top: 3px; font-weight: 300; }
+  .todo-meta strong { color: var(--accent); font-weight: 600; }
+  .todo-meta .assigned-by-label { color: var(--sage); }
+  .todo-meta .assigned-by-label strong { color: var(--sage); }
+  .todo-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; position: relative; }
+  .todo-dots-btn { width: 30px; height: 30px; border: none; background: transparent; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--ink-light); font-size: 20px; transition: all .15s; line-height: 1; padding-bottom: 4px; }
+  .todo-dots-btn:hover { background: var(--cream); color: var(--ink); }
+  .todo-delete { width: 30px; height: 30px; border: none; background: transparent; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--ink-light); font-size: 18px; transition: all .2s; }
+  .todo-delete:hover { background: #FDECEA; color: #C0392B; }
+  .dots-menu { position: absolute; right: 36px; top: 50%; transform: translateY(-50%); background: var(--warm-white); border: 1.5px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); z-index: 300; min-width: 170px; overflow: hidden; display: none; }
+  .dots-menu.open { display: block; }
+  .dots-menu-label { padding: 9px 14px 5px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-light); }
+  .dots-menu-item { padding: 10px 14px; font-size: 14px; cursor: pointer; color: var(--ink); transition: background .15s; display: flex; align-items: center; gap: 10px; }
+  .dots-menu-item:hover { background: var(--accent-pale); color: var(--accent); }
+  .m-av { width: 24px; height: 24px; border-radius: 50%; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .empty-state { text-align: center; padding: 64px 0; color: var(--ink-light); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state p { font-size: 16px; font-weight: 300; }
+  .section-divider { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--ink); margin: 44px 0 20px; display: flex; align-items: center; gap: 14px; }
+  .section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* CALENDAR */
+  .calendar-layout { display: grid; grid-template-columns: 1fr 360px; gap: 32px; align-items: start; }
+  .calendar-grid-wrap { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; padding: 24px 28px; border-bottom: 1px solid var(--border); }
+  .cal-nav h3 { font-family: 'Playfair Display', serif; font-size: 22px; }
+  .cal-arrow { width: 36px; height: 36px; border: 1.5px solid var(--border); background: transparent; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--ink-muted); transition: all .2s; }
+  .cal-arrow:hover { border-color: var(--accent); color: var(--accent); }
+  .cal-days-header { display: grid; grid-template-columns: repeat(7,1fr); background: var(--cream); border-bottom: 1px solid var(--border); }
+  .cal-day-label { text-align: center; padding: 10px 0; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-light); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); }
+  .cal-cell { min-height: 80px; padding: 8px 10px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); cursor: pointer; transition: background .15s; }
+  .cal-cell:nth-child(7n) { border-right: none; }
+  .cal-cell:hover { background: var(--accent-pale); }
+  .cal-cell.other-month { opacity: .35; }
+  .cal-cell.today .cal-date-num { background: var(--accent); color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+  .cal-cell.selected { background: var(--accent-pale); }
+  .cal-date-num { font-size: 13px; font-weight: 600; color: var(--ink-muted); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+  .cal-event-dot { color: white; font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; cursor: pointer; transition: opacity .15s; }
+  .cal-event-dot:hover { opacity: .8; }
+  .cal-event-dot.c0 { background: var(--accent); }
+  .cal-event-dot.c1 { background: var(--sage); }
+  .cal-event-dot.c2 { background: #6C5CE7; }
+  .event-sidebar { position: sticky; top: 80px; }
+  .event-sidebar-header { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .event-sidebar-header h4 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 4px; }
+  .selected-date-label { font-size: 13px; color: var(--ink-light); margin-bottom: 20px; font-weight: 300; }
+  .efg { margin-bottom: 14px; }
+  .efg label { display: block; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 6px; }
+  .efg input, .efg textarea, .efg select { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; background: var(--cream); color: var(--ink); outline: none; transition: border-color .2s; resize: none; }
+  .efg input:focus, .efg textarea:focus, .efg select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(196,112,58,.1); }
+  .efg textarea { height: 68px; }
+  .time-row { display: flex; gap: 8px; }
+  .time-row input { flex: 1; }
+  .btn-add-event { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; margin-top: 4px; }
+  .btn-add-event:hover { background: #B5602E; }
+  .events-list-box { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  .elb-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; letter-spacing: .04em; color: var(--ink-muted); text-transform: uppercase; }
+  .elb-inner { max-height: 300px; overflow-y: auto; }
+  .event-list-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border); transition: background .15s; cursor: pointer; animation: slideIn .2s ease; }
+  .event-list-item:last-child { border-bottom: none; }
+  .event-list-item:hover { background: var(--cream); }
+  .ev-color-bar { width: 3px; border-radius: 2px; background: var(--accent); align-self: stretch; flex-shrink: 0; min-height: 36px; }
+  .ev-info { flex: 1; min-width: 0; }
+  .ev-title { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ev-meta { font-size: 12px; color: var(--ink-light); }
+  .ev-assign-badge { font-size: 11px; color: var(--accent); font-weight: 600; margin-top: 3px; }
+  .ev-assign-badge.by { color: var(--sage); }
+  .ev-desc { font-size: 12px; color: var(--ink-muted); margin-top: 4px; font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ev-del-btn { border: none; background: transparent; cursor: pointer; color: var(--ink-light); font-size: 16px; padding: 2px; border-radius: 4px; transition: all .2s; flex-shrink: 0; margin-top: 2px; }
+  .ev-del-btn:hover { color: #C0392B; background: #FDECEA; }
+  .no-events { padding: 28px 20px; text-align: center; color: var(--ink-light); font-size: 13px; font-weight: 300; }
+
+  /* HIRING */
+  .hiring-top { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 40px; }
+  .applicant-card { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 20px 24px; display: flex; align-items: center; gap: 18px; transition: box-shadow .2s, border-color .2s; animation: slideIn .25s ease; }
+  .applicant-card:hover { box-shadow: var(--shadow); border-color: rgba(196,112,58,.25); }
+  .ap-avatar { width: 44px; height: 44px; border-radius: 50%; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Playfair Display', serif; background: var(--accent-pale); color: var(--accent); }
+  .ap-avatar.acc { background: var(--sage-pale); color: var(--sage); }
+  .ap-avatar.den { background: #FDECEA; color: #C0392B; }
+  .ap-info { flex: 1; min-width: 0; }
+  .ap-name { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .ap-notes { font-size: 13px; color: var(--ink-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 300; }
+  .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+  .status-badge.Pending { background: var(--cream); color: var(--ink-muted); border: 1px solid var(--border); }
+  .status-badge.Accepted { background: var(--sage-pale); color: var(--sage); }
+  .status-badge.Denied { background: #FDECEA; color: #C0392B; }
+  .ap-btns { display: flex; gap: 8px; flex-shrink: 0; }
+  .ap-btn { border: none; background: transparent; cursor: pointer; width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all .15s; color: var(--ink-light); }
+  .ap-btn.edit:hover { background: var(--accent-pale); color: var(--accent); }
+  .ap-btn.del:hover { background: #FDECEA; color: #C0392B; }
+
+  /* MODALS */
+  .modal-overlay { position: fixed; inset: 0; z-index: 999; background: rgba(26,20,16,.45); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal-box { background: var(--warm-white); border-radius: var(--radius); padding: 36px 40px; width: 460px; max-width: 90vw; box-shadow: var(--shadow-lg); position: relative; transform: translateY(12px); transition: transform .25s ease; }
+  .modal-overlay.open .modal-box { transform: translateY(0); }
+  .modal-close { position: absolute; top: 16px; right: 18px; border: none; background: transparent; font-size: 22px; color: var(--ink-light); cursor: pointer; line-height: 1; border-radius: 6px; padding: 2px 6px; transition: all .15s; }
+  .modal-close:hover { background: var(--cream); color: var(--ink); }
+  .modal-tag { display: inline-block; background: var(--accent-pale); color: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--ink); margin-bottom: 20px; line-height: 1.2; }
+  .modal-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+  .modal-icon { width: 32px; height: 32px; background: var(--cream); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .modal-lbl { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 2px; }
+  .modal-val { font-size: 15px; color: var(--ink); line-height: 1.5; }
+  .modal-divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .modal-del-btn { width: 100%; padding: 12px; background: transparent; border: 1.5px solid #F5C6BF; color: #C0392B; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .modal-del-btn:hover { background: #FDECEA; }
+  .member-option { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: all .15s; font-size: 14px; color: var(--ink); }
+  .member-option:hover { border-color: var(--accent); background: var(--accent-pale); color: var(--accent); }
+  .member-options { display: flex; flex-direction: column; gap: 8px; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 900px) {
+    .login-left { display: none; }
+    .login-right { width: 100%; }
+    .calendar-layout { grid-template-columns: 1fr; }
+    .page { padding: 32px 20px; }
+    .app-bar { padding: 0 16px; }
+    .nav-tab { padding: 6px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-page">
+  <div class="login-left">
+    <div class="login-brand">
+      <div class="logo-mark">SC</div>
+      <h1>School<br><em>Civics</em></h1>
+      <p>Track tasks, schedule events, and collaborate — all in one focused space.</p>
+    </div>
+  </div>
+  <div class="login-right">
+    <h2>Welcome back</h2>
+    <p class="subtitle">Sign in to continue to School Civics</p>
+    <div class="error-msg" id="error-msg">Incorrect username or password. Please try again.</div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="username-input" placeholder="Enter your username" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password-input" placeholder="Enter your password" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+    <div style="text-align:center; margin-top:20px;">
+      <button onclick="showInternLogin()" style="background:none;border:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Applicant Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- APPLICANT LOGIN PAGE -->
+<div id="intern-login-page" style="display:none; min-height:100vh; display:none; align-items:stretch; position:relative; z-index:1; flex-direction:row;">
+  <div class="login-left" style="background: linear-gradient(135deg, #1A1410 60%, #2E1A0E);">
+    <div class="login-brand">
+      <div class="logo-mark">SC</div>
+      <h1>Applicant<br><em>Portal</em></h1>
+      <p>Sign in with the credentials provided to you by the School Civics team to view your application status.</p>
+    </div>
+  </div>
+  <div class="login-right">
+    <h2>Applicant Sign In</h2>
+    <p class="subtitle">Use your assigned portal credentials</p>
+    <div class="error-msg" id="intern-error-msg">Invalid email or password. Please check your credentials.</div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="intern-email-input" placeholder="Enter your email">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="intern-password-input" placeholder="Enter your password">
+    </div>
+    <button class="btn-primary" onclick="doInternLogin()">Sign In →</button>
+    <div style="text-align:center; margin-top:20px;">
+      <button onclick="showMainLogin()" style="background:none;border:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink-muted);cursor:pointer;">← Back to main login</button>
+    </div>
+  </div>
+</div>
+
+<!-- INTERN PORTAL PAGE -->
+<div id="intern-portal-page" style="display:none; min-height:100vh; position:relative; z-index:1;">
+  <div style="background:var(--warm-white); border-bottom:1px solid var(--border); padding:0 32px; height:64px; display:flex; align-items:center; justify-content:space-between;">
+    <div style="font-family:'Playfair Display',serif; font-size:20px; display:flex; align-items:center; gap:10px;">
+      <div style="width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:700;">SC</div>
+      School Civics — Applicant Portal
+    </div>
+    <button class="logout-btn" onclick="internLogout()">Sign out</button>
+  </div>
+  <div style="max-width:700px; margin:80px auto; padding:0 32px; text-align:center;">
+    <div id="intern-avatar-circle" style="width:80px;height:80px;border-radius:50%;background:var(--accent-pale);color:var(--accent);font-family:'Playfair Display',serif;font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;"></div>
+    <h1 style="font-family:'Playfair Display',serif; font-size:42px; margin-bottom:12px;">Welcome, <em id="intern-first-name" style="color:var(--accent);font-style:italic;"></em>!</h1>
+    <p style="color:var(--ink-light); font-size:16px; font-weight:300; margin-bottom:48px; line-height:1.7;">You have successfully signed into the School Civics Applicant Portal. Click below to view your application decision.</p>
+    <button onclick="showStatusLetter()" style="padding:18px 48px; background:var(--ink); color:white; border:none; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:16px; font-weight:600; cursor:pointer; transition:background .2s; letter-spacing:.02em;">📬 View Status Update</button>
+  </div>
+</div>
+
+<!-- STATUS LETTER PAGE -->
+<div id="status-letter-page" style="display:none; min-height:100vh; position:relative; z-index:1; background:var(--cream);">
+  <canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;"></canvas>
+  <div style="background:var(--warm-white); border-bottom:1px solid var(--border); padding:0 32px; height:64px; display:flex; align-items:center; justify-content:space-between;">
+    <div style="font-family:'Playfair Display',serif; font-size:20px; display:flex; align-items:center; gap:10px;">
+      <div style="width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:700;">SC</div>
+      School Civics — Applicant Portal
+    </div>
+    <button onclick="backToPortal()" class="logout-btn">← Back to Portal</button>
+  </div>
+  <div style="max-width:720px; margin:48px auto; padding:0 32px 80px;">
+    <div id="letter-box" style="background:var(--warm-white); border:1.5px solid var(--border); border-radius:var(--radius); padding:60px 64px; box-shadow:var(--shadow-lg); position:relative; overflow:hidden;"></div>
+  </div>
+</div>
+
+<!-- COMMITMENT FORM PAGE -->
+<div id="commitment-form-page" style="display:none; min-height:100vh; position:relative; z-index:1; background:var(--cream);">
+  <div style="background:var(--warm-white); border-bottom:1px solid var(--border); padding:0 32px; height:64px; display:flex; align-items:center; justify-content:space-between;">
+    <div style="font-family:'Playfair Display',serif; font-size:20px; display:flex; align-items:center; gap:10px;">
+      <div style="width:32px;height:32px;background:var(--sage);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:700;">SC</div>
+      School Civics — Form of Commitment
+    </div>
+    <button onclick="backToLetter()" class="logout-btn">← Back to Letter</button>
+  </div>
+  <div style="max-width:680px; margin:48px auto; padding:0 32px 80px;">
+    <div style="background:var(--warm-white); border:1.5px solid var(--border); border-radius:var(--radius); border-top:6px solid var(--sage); padding:52px 56px; box-shadow:var(--shadow-lg);">
+      <div style="text-align:center; margin-bottom:40px;">
+        <div style="font-family:'Playfair Display',serif; font-size:13px; letter-spacing:.2em; text-transform:uppercase; color:var(--sage); margin-bottom:8px;">School Civics Program</div>
+        <div style="font-family:'Playfair Display',serif; font-size:30px; font-weight:700; color:var(--ink); margin-bottom:8px;">Form of Commitment</div>
+        <div style="width:60px; height:2px; background:var(--sage); margin:0 auto;"></div>
+        <p style="margin-top:16px; color:var(--ink-light); font-size:14px; line-height:1.7; font-weight:300;">By completing this form, you are formally confirming your acceptance of an internship position with School Civics. Please fill out all fields below carefully and honestly.</p>
+      </div>
+
+      <div id="commitment-error" style="display:none; background:#FDECEA; border:1px solid #F5C6BF; color:#C0392B; border-radius:var(--radius-sm); padding:12px 16px; font-size:13px; margin-bottom:20px;"></div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px;">First Name *</label>
+        <input type="text" id="cf-first" placeholder="Your first name" style="width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;background:var(--cream);color:var(--ink);outline:none;" onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px;">Last Name *</label>
+        <input type="text" id="cf-last" placeholder="Your last name" style="width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;background:var(--cream);color:var(--ink);outline:none;" onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px;">Email Address *</label>
+        <input type="email" id="cf-email" placeholder="your@email.com" style="width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;background:var(--cream);color:var(--ink);outline:none;" onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div style="margin-bottom:32px;">
+        <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px;">Create a Password *</label>
+        <input type="password" id="cf-password" placeholder="Choose a secure password" style="width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;background:var(--cream);color:var(--ink);outline:none;" onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+
+      <div style="background:var(--cream); border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:24px 28px; margin-bottom:28px;">
+        <div style="font-family:'Playfair Display',serif; font-size:18px; margin-bottom:16px; color:var(--ink);">Terms of Agreement</div>
+        <p style="font-size:13px; color:var(--ink-muted); line-height:1.8; margin-bottom:20px;">Please read and acknowledge each of the following terms before submitting your Form of Commitment.</p>
+
+        <div id="terms-list" style="display:flex; flex-direction:column; gap:14px;">
+          <label style="display:flex; gap:12px; align-items:flex-start; cursor:pointer;">
+            <input type="checkbox" id="term1" style="margin-top:3px; accent-color:var(--sage); flex-shrink:0;">
+            <span style="font-size:13px; color:var(--ink-muted); line-height:1.7;"><strong>Commitment to Participation:</strong> I understand that by accepting this position, I am committing to actively participate in all assigned tasks, meetings, and activities for the full duration of my internship with School Civics.</span>
+          </label>
+          <label style="display:flex; gap:12px; align-items:flex-start; cursor:pointer;">
+            <input type="checkbox" id="term2" style="margin-top:3px; accent-color:var(--sage); flex-shrink:0;">
+            <span style="font-size:13px; color:var(--ink-muted); line-height:1.7;"><strong>Professionalism & Conduct:</strong> I agree to conduct myself with integrity, respect, and professionalism in all interactions with fellow interns, staff, and community members representing School Civics.</span>
+          </label>
+          <label style="display:flex; gap:12px; align-items:flex-start; cursor:pointer;">
+            <input type="checkbox" id="term3" style="margin-top:3px; accent-color:var(--sage); flex-shrink:0;">
+            <span style="font-size:13px; color:var(--ink-muted); line-height:1.7;"><strong>Confidentiality:</strong> I agree to keep all internal communications, strategies, and organizational information confidential and will not share proprietary School Civics content with outside parties without prior written authorization.</span>
+          </label>
+          <label style="display:flex; gap:12px; align-items:flex-start; cursor:pointer;">
+            <input type="checkbox" id="term4" style="margin-top:3px; accent-color:var(--sage); flex-shrink:0;">
+            <span style="font-size:13px; color:var(--ink-muted); line-height:1.7;"><strong>Timely Communication:</strong> I commit to responding to all communications from the School Civics team in a timely manner — generally within 48 hours — and to proactively communicate any scheduling conflicts or concerns as soon as they arise.</span>
+          </label>
+          <label style="display:flex; gap:12px; align-items:flex-start; cursor:pointer;">
+            <input type="checkbox" id="term5" style="margin-top:3px; accent-color:var(--sage); flex-shrink:0;">
+            <span style="font-size:13px; color:var(--ink-muted); line-height:1.7;"><strong>Authentic Representation:</strong> I confirm that all information provided in this form and in my original application is accurate, complete, and truthful to the best of my knowledge.</span>
+          </label>
+          <label style="display:flex; gap:12px; align-items:flex-start; cursor:pointer;">
+            <input type="checkbox" id="term6" style="margin-top:3px; accent-color:var(--sage); flex-shrink:0;">
+            <span style="font-size:13px; color:var(--ink-muted); line-height:1.7;"><strong>Acknowledgment of Expectations:</strong> I understand that failure to uphold the responsibilities of this internship may result in removal from the program, and I accept these expectations willingly and without reservation.</span>
+          </label>
+        </div>
+      </div>
+
+      <button onclick="submitCommitmentForm()" style="width:100%; padding:16px; background:var(--sage); color:white; border:none; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; transition:background .2s; letter-spacing:.02em;">Submit Form of Commitment →</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMMITMENT SUCCESS PAGE -->
+<div id="commitment-success-page" style="display:none; min-height:100vh; position:relative; z-index:1; background:var(--cream);">
+  <div style="background:var(--warm-white); border-bottom:1px solid var(--border); padding:0 32px; height:64px; display:flex; align-items:center;">
+    <div style="font-family:'Playfair Display',serif; font-size:20px; display:flex; align-items:center; gap:10px;">
+      <div style="width:32px;height:32px;background:var(--sage);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:700;">SC</div>
+      School Civics — Applicant Portal
+    </div>
+  </div>
+  <div style="max-width:600px; margin:100px auto; padding:0 32px; text-align:center;">
+    <div style="font-size:64px; margin-bottom:24px;">🎉</div>
+    <h1 style="font-family:'Playfair Display',serif; font-size:38px; margin-bottom:16px; color:var(--ink);">You're all set!</h1>
+    <p style="color:var(--ink-light); font-size:16px; font-weight:300; line-height:1.8; margin-bottom:40px;">Your Form of Commitment has been successfully submitted. The School Civics team has been notified and will be in touch with next steps. Welcome aboard!</p>
+    <button onclick="internLogout()" style="padding:14px 36px; background:var(--ink); color:white; border:none; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer;">Return to Sign In</button>
+  </div>
+</div>
+<div id="app-page">
+  <div class="app-bar">
+    <div class="brand"><span>SC</span> School Civics</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tab-todo" onclick="switchTab('todo',this)">☑ To-Do</button>
+      <button class="nav-tab" id="tab-calendar" onclick="switchTab('calendar',this)">📅 Calendar</button>
+      <button class="nav-tab" id="tab-hiring" onclick="switchTab('hiring',this)" style="display:none">👥 Hiring</button>
+    </div>
+    <div class="user-pill">
+      <div class="user-avatar-sm" id="nav-avatar"></div>
+      <span class="user-name-sm" id="nav-name"></span>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Sign out</button>
+  </div>
+
+  <!-- TODO PAGE -->
+  <div class="page active" id="page-todo">
+    <div class="page-header">
+      <h2>To-Do</h2>
+      <p id="today-greeting"></p>
+    </div>
+    <div id="todo-add-wrap">
+      <div class="todo-add-row">
+        <input type="text" id="todo-input" placeholder="Add a new task… press Enter or click Add" onkeydown="if(event.key==='Enter') addTodo()">
+        <button class="btn-add" onclick="addTodo()">+ Add Task</button>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-chip sc-total">📋 <span id="stat-total">0</span> total</div>
+      <div class="stat-chip sc-done">✓ <span id="stat-done">0</span> completed</div>
+      <div class="stat-chip sc-left">◷ <span id="stat-left">0</span> remaining</div>
+    </div>
+    <div class="todo-list" id="todo-list"></div>
+    <div class="empty-state" id="todo-empty" style="display:none">
+      <div class="icon">🌿</div>
+      <p id="todo-empty-msg">No tasks yet.</p>
+    </div>
+    <!-- Founder: assigned tasks section -->
+    <div id="assigned-section" style="display:none">
+      <div class="section-divider">Assigned to Members</div>
+      <div class="todo-list" id="assigned-list"></div>
+    </div>
+  </div>
+
+  <!-- CALENDAR PAGE -->
+  <div class="page" id="page-calendar">
+    <div class="page-header">
+      <h2>Calendar</h2>
+      <p>Plan your days and never miss a moment.</p>
+    </div>
+    <div class="calendar-layout">
+      <div>
+        <div class="calendar-grid-wrap">
+          <div class="cal-nav">
+            <button class="cal-arrow" onclick="changeMonth(-1)">←</button>
+            <h3 id="cal-month-label"></h3>
+            <button class="cal-arrow" onclick="changeMonth(1)">→</button>
+          </div>
+          <div class="cal-days-header">
+            <div class="cal-day-label">Sun</div><div class="cal-day-label">Mon</div>
+            <div class="cal-day-label">Tue</div><div class="cal-day-label">Wed</div>
+            <div class="cal-day-label">Thu</div><div class="cal-day-label">Fri</div>
+            <div class="cal-day-label">Sat</div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+      </div>
+      <div class="event-sidebar">
+        <!-- Add panel (founder only) -->
+        <div class="event-sidebar-header" id="ev-add-panel">
+          <h4>Add Event</h4>
+          <div class="selected-date-label" id="selected-date-label">Click a date on the calendar</div>
+          <div class="efg"><label>Event Title</label><input type="text" id="event-title" placeholder="e.g. Team standup"></div>
+          <div class="efg"><label>Time</label><div class="time-row"><input type="time" id="event-start" value="09:00"><input type="time" id="event-end" value="10:00"></div></div>
+          <div class="efg"><label>Description</label><textarea id="event-desc" placeholder="Optional notes…"></textarea></div>
+          <div class="efg" id="ev-assign-wrap">
+            <label>Assign to Member (optional)</label>
+            <select id="event-assign">
+              <option value="">— No assignment —</option>
+              <option value="naunidh">Naunidh Bhushan</option>
+              <option value="varun">Varun Krishnaswamy</option>
+              <option value="abhay">Abhay Krishnan</option>
+            </select>
+          </div>
+          <button class="btn-add-event" onclick="addEvent()">+ Add Event</button>
+        </div>
+        <div class="events-list-box">
+          <div class="elb-header" id="elb-header">Events on selected day</div>
+          <div class="elb-inner" id="elb-inner"><div class="no-events">Select a date to view events</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIRING PAGE -->
+  <div class="page" id="page-hiring">
+    <div class="hiring-top">
+      <div class="page-header" style="margin-bottom:0">
+        <h2>Hiring</h2>
+        <p>Track applicants and manage your recruitment pipeline.</p>
+      </div>
+      <button class="btn-add" onclick="openApplicantModal()">+ Add Applicant</button>
+    </div>
+
+    <!-- Commitment Notifications -->
+    <div id="commitment-notifications" style="display:none; margin-bottom:28px;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px;">🔔 Notifications</div>
+      <div id="notifications-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+    <div class="stat-row" style="margin-bottom:28px;">
+      <div class="stat-chip sc-total">👥 <span id="h-total">0</span> total</div>
+      <div class="stat-chip sc-done">✅ <span id="h-acc">0</span> accepted</div>
+      <div class="stat-chip sc-left">❌ <span id="h-den">0</span> denied</div>
+      <div class="stat-chip sc-total">⏳ <span id="h-pend">0</span> pending</div>
+    </div>
+    <div id="hiring-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+    <div class="empty-state" id="hiring-empty">
+      <div class="icon">🤝</div>
+      <p>No applicants yet. Press "Add Applicant" to get started.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ASSIGN TASK MODAL -->
+<div class="modal-overlay" id="assign-modal" onclick="if(event.target===this)closeAssignModal()">
+  <div class="modal-box" style="width:380px;">
+    <button class="modal-close" onclick="closeAssignModal()">×</button>
+    <div class="modal-tag">Assign Task</div>
+    <div class="modal-title" id="assign-task-label" style="font-size:17px;margin-bottom:22px;"></div>
+    <div class="member-options">
+      <div class="member-option" onclick="doAssign('naunidh')">
+        <div class="m-av" style="background:var(--accent-pale);color:var(--accent);">NB</div>
+        Naunidh Bhushan
+      </div>
+      <div class="member-option" onclick="doAssign('varun')">
+        <div class="m-av" style="background:var(--sage-pale);color:var(--sage);">VK</div>
+        Varun Krishnaswamy
+      </div>
+      <div class="member-option" onclick="doAssign('abhay')">
+        <div class="m-av" style="background:#EDE8F5;color:#6C5CE7;">AK</div>
+        Abhay Krishnan
+      </div>
+    </div>
+    <div class="modal-divider"></div>
+    <button class="modal-del-btn" style="border-color:var(--border);color:var(--ink-muted);" onclick="doAssign(null)">Remove Assignment</button>
+  </div>
+</div>
+
+<!-- EVENT DETAIL MODAL -->
+<div class="modal-overlay" id="event-modal" onclick="if(event.target===this)closeEvModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeEvModal()">×</button>
+    <div class="modal-tag" id="ev-modal-date"></div>
+    <div class="modal-title" id="ev-modal-title"></div>
+    <div class="modal-row">
+      <div class="modal-icon">🕐</div>
+      <div><div class="modal-lbl">Time</div><div class="modal-val" id="ev-modal-time"></div></div>
+    </div>
+    <div class="modal-row" id="ev-modal-to-row" style="display:none">
+      <div class="modal-icon">👤</div>
+      <div><div class="modal-lbl">Assigned to</div><div class="modal-val" id="ev-modal-to"></div></div>
+    </div>
+    <div class="modal-row" id="ev-modal-by-row" style="display:none">
+      <div class="modal-icon">📌</div>
+      <div><div class="modal-lbl">Assigned by</div><div class="modal-val" id="ev-modal-by"></div></div>
+    </div>
+    <div class="modal-row" id="ev-modal-desc-row" style="display:none">
+      <div class="modal-icon">📝</div>
+      <div><div class="modal-lbl">Description</div><div class="modal-val" id="ev-modal-desc"></div></div>
+    </div>
+    <div class="modal-divider"></div>
+    <button class="modal-del-btn" id="ev-modal-del">🗑 Remove Event</button>
+  </div>
+</div>
+
+<!-- APPLICANT MODAL -->
+<div class="modal-overlay" id="applicant-modal" onclick="if(event.target===this)closeApModal()">
+  <div class="modal-box" style="width:500px;">
+    <button class="modal-close" onclick="closeApModal()">×</button>
+    <div class="modal-tag" id="ap-modal-tag">New Applicant</div>
+    <div class="modal-title" style="font-size:22px;margin-bottom:22px;">Applicant Details</div>
+    <div class="efg"><label>Full Name</label><input type="text" id="ap-name" placeholder="e.g. Jordan Smith"></div>
+    <div class="efg"><label>Status</label>
+      <select id="ap-status">
+        <option value="Pending">⏳ Pending Review</option>
+        <option value="Accepted">✅ Accept</option>
+        <option value="Denied">❌ Deny</option>
+      </select>
+    </div>
+    <div class="efg"><label>Portal Email</label><input type="email" id="ap-email" placeholder="e.g. jordan@email.com"></div>
+    <div class="efg"><label>Portal Password</label><input type="text" id="ap-password" placeholder="Set a password for this applicant"></div>
+    <div class="efg"><label>Notes</label><textarea id="ap-notes" placeholder="Write any notes about this applicant…" style="height:90px;"></textarea></div>
+    <div class="modal-divider"></div>
+    <button class="btn-add-event" onclick="saveApplicant()">Save Applicant</button>
+  </div>
+</div>
+
+<script>
+// ─── USERS ───
+const USERS = {
+  'SC Founder': { pass: 'schoolcivics26', role: 'founder', name: 'SC Founder',           initials: 'SC' },
+  'naunidh':    { pass: 'nb_civics26',    role: 'member',  name: 'Naunidh Bhushan',       initials: 'NB' },
+  'varun':      { pass: 'vk_civics26',    role: 'member',  name: 'Varun Krishnaswamy',    initials: 'VK' },
+  'abhay':      { pass: 'ak_civics26',    role: 'member',  name: 'Abhay Krishnan',        initials: 'AK' },
+};
+const MEMBER_NAMES = { naunidh: 'Naunidh Bhushan', varun: 'Varun Krishnaswamy', abhay: 'Abhay Krishnan' };
+
+// ─── SHARED STATE ───
+let todos      = [];
+let events     = {};
+let applicants = [];
+
+let currentUser      = null;
+let assigningTodoId  = null;
+let editingApId      = null;
+
+// ─── PERSISTENCE ───
+function save() {
+  try {
+    localStorage.setItem('sc_todos',      JSON.stringify(todos));
+    localStorage.setItem('sc_events',     JSON.stringify(events));
+    localStorage.setItem('sc_applicants', JSON.stringify(applicants));
+  } catch(e) { console.warn('Storage save failed', e); }
+}
+function loadData() {
+  try {
+    todos      = JSON.parse(localStorage.getItem('sc_todos'))      || [];
+    events     = JSON.parse(localStorage.getItem('sc_events'))     || {};
+    applicants = JSON.parse(localStorage.getItem('sc_applicants')) || [];
+  } catch(e) {
+    todos = []; events = {}; applicants = [];
+  }
+}
+loadData();
+
+// ─── AUTH ───
+function hideAllPages() {
+  ['intern-login-page','intern-portal-page','status-letter-page',
+   'commitment-form-page','commitment-success-page'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+}
+
+function doLogin() {
+  const u = document.getElementById('username-input').value.trim();
+  const p = document.getElementById('password-input').value;
+  const user = USERS[u];
+  if (user && user.pass === p) {
+    currentUser = { username: u, ...user };
+    document.getElementById('error-msg').classList.remove('show');
+    hideAllPages();
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('app-page').style.display = 'block';
+    setupUI();
+    setGreeting();
+    renderTodos();
+    renderCalendar();
+  } else {
+    document.getElementById('error-msg').classList.add('show');
+    document.getElementById('password-input').value = '';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-page').style.display !== 'none') doLogin();
+  if (e.key === 'Escape') { closeAssignModal(); closeEvModal(); closeApModal(); closeAllMenus(); }
+});
+
+function doLogout() {
+  currentUser = null;
+  hideAllPages();
+  document.getElementById('login-page').style.display = 'flex';
+  document.getElementById('app-page').style.display = 'none';
+  document.getElementById('username-input').value = '';
+  document.getElementById('password-input').value = '';
+  switchTab('todo', document.getElementById('tab-todo'));
+}
+
+function setupUI() {
+  const isFounder = currentUser.role === 'founder';
+  document.getElementById('nav-avatar').textContent = currentUser.initials;
+  document.getElementById('nav-name').textContent   = currentUser.name;
+  document.getElementById('tab-hiring').style.display  = isFounder ? '' : 'none';
+  document.getElementById('todo-add-wrap').style.display = isFounder ? '' : 'none';
+  document.getElementById('ev-add-panel').style.display  = isFounder ? '' : 'none';
+}
+
+// ─── NAV ───
+function switchTab(tab, btn) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('page-' + tab).classList.add('active');
+  if (tab === 'hiring') loadNotifications();
+}
+
+function setGreeting() {
+  const h = new Date().getHours();
+  const g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MOS  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const n = new Date();
+  document.getElementById('today-greeting').textContent = `${g}, ${currentUser.name} — ${DAYS[n.getDay()]}, ${MOS[n.getMonth()]} ${n.getDate()}`;
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ─── TODO ───
+function addTodo() {
+  const inp = document.getElementById('todo-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  todos.push({ id: Date.now(), text, done: false, assignedTo: null, assignedBy: null });
+  inp.value = '';
+  save();
+  renderTodos();
+}
+function toggleTodo(id) {
+  const t = todos.find(x => x.id === id);
+  if (t) t.done = !t.done;
+  save();
+  renderTodos();
+}
+function deleteTodo(id) {
+  todos = todos.filter(x => x.id !== id);
+  save();
+  renderTodos();
+}
+
+// Three-dot assign menu
+function toggleMenu(id) {
+  closeAllMenus();
+  const m = document.getElementById('dm-' + id);
+  if (m) m.classList.toggle('open');
+}
+function closeAllMenus() { document.querySelectorAll('.dots-menu').forEach(m => m.classList.remove('open')); }
+document.addEventListener('click', e => { if (!e.target.closest('.todo-dots-btn') && !e.target.closest('.dots-menu')) closeAllMenus(); });
+
+function openAssignModal(id) {
+  assigningTodoId = id;
+  const t = todos.find(x => x.id === id);
+  document.getElementById('assign-task-label').textContent = t ? '"' + t.text + '"' : '';
+  document.getElementById('assign-modal').classList.add('open');
+  closeAllMenus();
+}
+function closeAssignModal() { document.getElementById('assign-modal').classList.remove('open'); assigningTodoId = null; }
+function doAssign(memberKey) {
+  const t = todos.find(x => x.id === assigningTodoId);
+  if (t) { t.assignedTo = memberKey; t.assignedBy = memberKey ? currentUser.name : null; }
+  closeAssignModal();
+  save();
+  renderTodos();
+}
+
+function renderTodos() {
+  const isFounder = currentUser && currentUser.role === 'founder';
+  let myList, assignedList;
+  if (isFounder) {
+    myList       = todos.filter(t => !t.assignedTo);
+    assignedList = todos.filter(t =>  t.assignedTo);
+  } else {
+    myList       = todos.filter(t => t.assignedTo === currentUser.username);
+    assignedList = [];
+  }
+
+  const total = myList.length;
+  const done  = myList.filter(t => t.done).length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-done').textContent  = done;
+  document.getElementById('stat-left').textContent  = total - done;
+
+  buildTodoList('todo-list', myList, isFounder);
+
+  const empty = document.getElementById('todo-empty');
+  const emptyMsg = document.getElementById('todo-empty-msg');
+  empty.style.display = myList.length === 0 ? 'block' : 'none';
+  emptyMsg.textContent = isFounder ? 'No unassigned tasks. Add one above.' : 'No tasks assigned to you yet.';
+
+  // Assigned section (founder)
+  const aSection = document.getElementById('assigned-section');
+  if (isFounder && assignedList.length > 0) {
+    aSection.style.display = '';
+    buildTodoList('assigned-list', assignedList, true);
+  } else {
+    aSection.style.display = 'none';
+  }
+}
+
+function buildTodoList(listId, taskArr, showDots) {
+  const list = document.getElementById(listId);
+  list.innerHTML = '';
+  taskArr.forEach(t => {
+    const item = document.createElement('div');
+    item.className = 'todo-item' + (t.done ? ' done' : '');
+
+    let metaHtml = '';
+    if (t.assignedTo && MEMBER_NAMES[t.assignedTo]) {
+      metaHtml = `<div class="todo-meta">Assigned to <strong>${esc(MEMBER_NAMES[t.assignedTo])}</strong>${t.assignedBy ? ' by <strong>' + esc(t.assignedBy) + '</strong>' : ''}</div>`;
+    } else if (!t.assignedTo && t.assignedBy === null && currentUser && currentUser.role === 'member') {
+      // show nothing extra
+    } else if (t.assignedBy && !t.assignedTo) {
+      metaHtml = `<div class="todo-meta">Assigned by <strong>${esc(t.assignedBy)}</strong></div>`;
+    }
+    // For member viewing their assigned task: show "Assigned by"
+    if (currentUser && currentUser.role === 'member' && t.assignedBy) {
+      metaHtml = `<div class="todo-meta">Assigned to you by <strong>${esc(t.assignedBy)}</strong></div>`;
+    }
+
+    const dotsHtml = showDots ? `
+      <div class="dots-menu" id="dm-${t.id}">
+        <div class="dots-menu-label">Options</div>
+        <div class="dots-menu-item" onclick="openAssignModal(${t.id})">
+          <span style="font-size:16px;">👤</span> Assign to member
+        </div>
+      </div>
+      <button class="todo-dots-btn" onclick="toggleMenu(${t.id})" title="More">⋮</button>` : '';
+
+    item.innerHTML = `
+      <div class="todo-checkbox" onclick="toggleTodo(${t.id})">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+          <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="todo-text-wrap">
+        <div class="todo-text">${esc(t.text)}</div>
+        ${metaHtml}
+      </div>
+      <div class="todo-actions">
+        ${dotsHtml}
+        <button class="todo-delete" onclick="deleteTodo(${t.id})" title="Delete">×</button>
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+// ─── CALENDAR ───
+let calDate      = new Date();
+let selectedDate = null;
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function changeMonth(d) { calDate.setMonth(calDate.getMonth() + d); renderCalendar(); }
+
+function visibleEventsFor(dateKey) {
+  const list = events[dateKey] || [];
+  if (!currentUser || currentUser.role === 'founder') return list;
+  return list.filter(e => !e.assignedTo || e.assignedTo === currentUser.username);
+}
+
+function renderCalendar() {
+  const yr = calDate.getFullYear(), mo = calDate.getMonth();
+  document.getElementById('cal-month-label').textContent = `${MONTHS[mo]} ${yr}`;
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  const firstDay = new Date(yr, mo, 1).getDay();
+  const dim      = new Date(yr, mo + 1, 0).getDate();
+  const today    = new Date();
+  const prevDim  = new Date(yr, mo, 0).getDate();
+  for (let i = firstDay - 1; i >= 0; i--) addCell(grid, prevDim - i, true, false, null);
+  for (let d = 1; d <= dim; d++) {
+    const dk = `${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getFullYear()===yr && today.getMonth()===mo && today.getDate()===d;
+    addCell(grid, d, false, isToday, dk, selectedDate===dk);
+  }
+  const rem = (firstDay + dim) % 7;
+  if (rem) for (let i = 1; i <= 7-rem; i++) addCell(grid, i, true, false, null);
+}
+
+function addCell(grid, num, other, isToday, dateKey, isSel) {
+  const cell = document.createElement('div');
+  cell.className = 'cal-cell' + (other?' other-month':'') + (isToday?' today':'') + (isSel?' selected':'');
+  if (dateKey) {
+    cell.onclick = () => selectDate(dateKey);
+    const numEl = document.createElement('div');
+    numEl.className = 'cal-date-num';
+    numEl.textContent = num;
+    cell.appendChild(numEl);
+    const vis = visibleEventsFor(dateKey);
+    vis.slice(0, 2).forEach((ev, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'cal-event-dot c' + i;
+      dot.textContent = ev.title;
+      dot.onclick = e => { e.stopPropagation(); openEvModal(dateKey, ev.id); };
+      cell.appendChild(dot);
+    });
+    if (vis.length > 2) {
+      const more = document.createElement('div');
+      more.className = 'cal-event-dot c1';
+      more.textContent = `+${vis.length-2} more`;
+      cell.appendChild(more);
+    }
+  } else {
+    const numEl = document.createElement('div');
+    numEl.className = 'cal-date-num';
+    numEl.textContent = num;
+    cell.appendChild(numEl);
+  }
+  grid.appendChild(cell);
+}
+
+function selectDate(dk) {
+  selectedDate = dk;
+  const [y,m,d] = dk.split('-');
+  const label = `${MONTHS[parseInt(m)-1]} ${parseInt(d)}, ${y}`;
+  document.getElementById('selected-date-label').textContent = label;
+  document.getElementById('elb-header').textContent = `Events · ${label}`;
+  renderCalendar();
+  renderEventsList();
+}
+
+function addEvent() {
+  if (!selectedDate) { alert('Please select a date first.'); return; }
+  const title = document.getElementById('event-title').value.trim();
+  if (!title) { document.getElementById('event-title').focus(); return; }
+  const start      = document.getElementById('event-start').value;
+  const end        = document.getElementById('event-end').value;
+  const desc       = document.getElementById('event-desc').value.trim();
+  const assignedTo = document.getElementById('event-assign').value;
+  const assignedBy = assignedTo ? currentUser.name : '';
+  if (!events[selectedDate]) events[selectedDate] = [];
+  events[selectedDate].push({ id: Date.now(), title, start, end, desc, assignedTo, assignedBy });
+  document.getElementById('event-title').value = '';
+  document.getElementById('event-desc').value  = '';
+  document.getElementById('event-assign').value = '';
+  save();
+  renderCalendar();
+  renderEventsList();
+}
+
+function deleteEvent(dk, id) {
+  if (!events[dk]) return;
+  events[dk] = events[dk].filter(e => e.id !== id);
+  if (!events[dk].length) delete events[dk];
+  save();
+  renderCalendar();
+  renderEventsList();
+}
+
+function fmtTime(t) {
+  if (!t) return ''; const [h,m] = t.split(':'); const hr = parseInt(h);
+  return `${hr%12||12}:${m} ${hr<12?'AM':'PM'}`;
+}
+
+function renderEventsList() {
+  const inner = document.getElementById('elb-inner');
+  const vis   = selectedDate ? visibleEventsFor(selectedDate) : [];
+  if (!vis.length) { inner.innerHTML = '<div class="no-events">No events on this day.</div>'; return; }
+  const sorted    = [...vis].sort((a,b) => a.start.localeCompare(b.start));
+  const isFounder = currentUser && currentUser.role === 'founder';
+  const isMember  = currentUser && currentUser.role === 'member';
+  inner.innerHTML = sorted.map(ev => {
+    let badge = '';
+    if (isFounder && ev.assignedTo) badge = `<div class="ev-assign-badge">→ ${esc(MEMBER_NAMES[ev.assignedTo]||ev.assignedTo)}</div>`;
+    if (isMember && ev.assignedBy)  badge = `<div class="ev-assign-badge by">Assigned by ${esc(ev.assignedBy)}</div>`;
+    return `
+    <div class="event-list-item" onclick="openEvModal('${selectedDate}',${ev.id})">
+      <div class="ev-color-bar"></div>
+      <div class="ev-info">
+        <div class="ev-title">${esc(ev.title)}</div>
+        <div class="ev-meta">${fmtTime(ev.start)}${ev.end?' – '+fmtTime(ev.end):''}</div>
+        ${badge}
+        ${ev.desc?`<div class="ev-desc">${esc(ev.desc)}</div>`:''}
+      </div>
+      ${isFounder?`<button class="ev-del-btn" onclick="event.stopPropagation();deleteEvent('${selectedDate}',${ev.id})" title="Remove">×</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function openEvModal(dk, id) {
+  const list = events[dk]; if (!list) return;
+  const ev   = list.find(e => e.id === id); if (!ev) return;
+  const [y,m,d] = dk.split('-');
+  document.getElementById('ev-modal-date').textContent  = `${MONTHS[parseInt(m)-1]} ${parseInt(d)}, ${y}`;
+  document.getElementById('ev-modal-title').textContent = ev.title;
+  document.getElementById('ev-modal-time').textContent  = fmtTime(ev.start) + (ev.end?' – '+fmtTime(ev.end):'');
+  const toRow = document.getElementById('ev-modal-to-row');
+  const byRow = document.getElementById('ev-modal-by-row');
+  const descRow = document.getElementById('ev-modal-desc-row');
+  if (ev.assignedTo && MEMBER_NAMES[ev.assignedTo]) { document.getElementById('ev-modal-to').textContent = MEMBER_NAMES[ev.assignedTo]; toRow.style.display = 'flex'; } else toRow.style.display = 'none';
+  if (ev.assignedBy) { document.getElementById('ev-modal-by').textContent = ev.assignedBy; byRow.style.display = 'flex'; } else byRow.style.display = 'none';
+  if (ev.desc) { document.getElementById('ev-modal-desc').textContent = ev.desc; descRow.style.display = 'flex'; } else descRow.style.display = 'none';
+  const isFounder = currentUser && currentUser.role === 'founder';
+  const delBtn = document.getElementById('ev-modal-del');
+  delBtn.style.display = isFounder ? '' : 'none';
+  delBtn.onclick = () => { deleteEvent(dk, id); closeEvModal(); };
+  document.getElementById('event-modal').classList.add('open');
+}
+function closeEvModal() { document.getElementById('event-modal').classList.remove('open'); }
+
+// ─── HIRING ───
+function openApplicantModal(id = null) {
+  editingApId = id;
+  const tag = document.getElementById('ap-modal-tag');
+  if (id !== null) {
+    const ap = applicants.find(a => a.id === id);
+    document.getElementById('ap-name').value     = ap.name;
+    document.getElementById('ap-status').value   = ap.status;
+    document.getElementById('ap-notes').value    = ap.notes;
+    document.getElementById('ap-email').value    = ap.email || '';
+    document.getElementById('ap-password').value = ap.password || '';
+    tag.textContent = 'Edit Applicant';
+  } else {
+    document.getElementById('ap-name').value     = '';
+    document.getElementById('ap-status').value   = 'Pending';
+    document.getElementById('ap-notes').value    = '';
+    document.getElementById('ap-email').value    = '';
+    document.getElementById('ap-password').value = '';
+    tag.textContent = 'New Applicant';
+  }
+  document.getElementById('applicant-modal').classList.add('open');
+  setTimeout(() => document.getElementById('ap-name').focus(), 80);
+}
+function closeApModal() { document.getElementById('applicant-modal').classList.remove('open'); editingApId = null; }
+
+function saveApplicant() {
+  const name = document.getElementById('ap-name').value.trim();
+  if (!name) { document.getElementById('ap-name').focus(); return; }
+  const status   = document.getElementById('ap-status').value;
+  const notes    = document.getElementById('ap-notes').value.trim();
+  const email    = document.getElementById('ap-email').value.trim().toLowerCase();
+  const password = document.getElementById('ap-password').value.trim();
+  if (editingApId !== null) {
+    const ap = applicants.find(a => a.id === editingApId);
+    ap.name = name; ap.status = status; ap.notes = notes;
+    ap.email = email; ap.password = password;
+  } else {
+    applicants.push({ id: Date.now(), name, status, notes, email, password });
+  }
+  closeApModal();
+  save();
+  renderApplicants();
+}
+function deleteApplicant(id) { applicants = applicants.filter(a => a.id !== id); save(); renderApplicants(); }
+
+function renderApplicants() {
+  const list  = document.getElementById('hiring-list');
+  const empty = document.getElementById('hiring-empty');
+  document.getElementById('h-total').textContent = applicants.length;
+  document.getElementById('h-acc').textContent   = applicants.filter(a=>a.status==='Accepted').length;
+  document.getElementById('h-den').textContent   = applicants.filter(a=>a.status==='Denied').length;
+  document.getElementById('h-pend').textContent  = applicants.filter(a=>a.status==='Pending').length;
+  list.innerHTML = '';
+  empty.style.display = applicants.length ? 'none' : 'block';
+  applicants.forEach(ap => {
+    const initials  = ap.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const cls       = ap.status==='Accepted'?'acc':ap.status==='Denied'?'den':'';
+    const badge     = ap.status==='Accepted'?'✅ Accepted':ap.status==='Denied'?'❌ Denied':'⏳ Pending';
+    const card = document.createElement('div');
+    card.className = 'applicant-card';
+    card.innerHTML = `
+      <div class="ap-avatar ${cls}">${initials}</div>
+      <div class="ap-info">
+        <div class="ap-name">${esc(ap.name)}</div>
+        <div class="ap-notes">${ap.notes ? esc(ap.notes) : 'No notes added.'}</div>
+      </div>
+      <span class="status-badge ${ap.status}">${badge}</span>
+      <div class="ap-btns">
+        <button class="ap-btn edit" onclick="openApplicantModal(${ap.id})" title="Edit">✏️</button>
+        <button class="ap-btn del"  onclick="deleteApplicant(${ap.id})"    title="Delete">🗑</button>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+// ─── INTERN AUTH ───
+let currentIntern = null;
+
+function showInternLogin() {
+  document.getElementById('login-page').style.display = 'none';
+  const p = document.getElementById('intern-login-page');
+  p.style.display = 'flex';
+}
+function showMainLogin() {
+  document.getElementById('intern-login-page').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+}
+function doInternLogin() {
+  const email = document.getElementById('intern-email-input').value.trim().toLowerCase();
+  const pass  = document.getElementById('intern-password-input').value;
+  const data  = JSON.parse(localStorage.getItem('sc_applicants') || '[]');
+  const ap    = data.find(a => a.email && a.email.toLowerCase() === email && a.password === pass);
+  if (ap) {
+    currentIntern = ap;
+    document.getElementById('intern-login-page').style.display = 'none';
+    showInternPortal();
+  } else {
+    document.getElementById('intern-error-msg').classList.add('show');
+    document.getElementById('intern-password-input').value = '';
+  }
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('intern-login-page').style.display === 'flex') doInternLogin();
+  }
+});
+
+function showInternPortal() {
+  const portal = document.getElementById('intern-portal-page');
+  portal.style.display = 'block';
+  const firstName = currentIntern.name.split(' ')[0];
+  const initials  = currentIntern.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  document.getElementById('intern-first-name').textContent = firstName;
+  document.getElementById('intern-avatar-circle').textContent = initials;
+}
+function internLogout() {
+  currentIntern = null;
+  hideAllPages();
+  document.getElementById('intern-email-input').value = '';
+  document.getElementById('intern-password-input').value = '';
+  document.getElementById('intern-error-msg').classList.remove('show');
+  document.getElementById('login-page').style.display = 'flex';
+}
+function backToPortal() {
+  stopConfetti();
+  document.getElementById('status-letter-page').style.display = 'none';
+  document.getElementById('intern-portal-page').style.display = 'block';
+}
+
+// ─── STATUS LETTER ───
+function showStatusLetter() {
+  document.getElementById('intern-portal-page').style.display = 'none';
+  const lp = document.getElementById('status-letter-page');
+  lp.style.display = 'block';
+  const ap = currentIntern;
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  const firstName = ap.name.split(' ')[0];
+  const box = document.getElementById('letter-box');
+
+  if (ap.status === 'Accepted') {
+    box.style.borderTop = '6px solid var(--sage)';
+    box.innerHTML = `
+      <div style="text-align:center; margin-bottom:36px;">
+        <div style="font-family:'Playfair Display',serif; font-size:13px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:8px;">School Civics Program</div>
+        <div style="font-family:'Playfair Display',serif; font-size:28px; font-weight:700; color:var(--ink);">Office of Intern Admissions</div>
+        <div style="width:60px; height:2px; background:var(--accent); margin:16px auto 0;"></div>
+      </div>
+      <p style="font-size:13px; color:var(--ink-light); margin-bottom:28px;">${dateStr}</p>
+      <p style="font-size:15px; margin-bottom:6px; color:var(--ink-muted);">Dear ${esc(ap.name)},</p>
+      <p style="font-size:22px; font-family:'Playfair Display',serif; font-weight:700; color:var(--sage); margin:24px 0; line-height:1.3;">
+        It is with great pleasure and enthusiasm that we offer you a position in the School Civics Internship Program.
+      </p>
+      <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:18px;">
+        After a thorough and competitive review process, the School Civics Admissions Committee has carefully evaluated your application, your expressed interests, and the qualities you bring to our community. We are delighted to inform you that you have been selected from a highly qualified and talented pool of applicants.
+      </p>
+      <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:18px;">
+        The School Civics Program is dedicated to cultivating the next generation of civic leaders — individuals who are passionate, thoughtful, and committed to meaningful change in their communities. In reviewing your application, we were deeply impressed by your dedication, your perspective, and your potential to contribute to and grow within our program.
+      </p>
+      <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:18px;">
+        As an intern, you will have the opportunity to work alongside our founding team, contribute to real-world civic initiatives, develop professional skills, and build lasting connections with peers and mentors who share your values. We believe this experience will be transformative, and we look forward to seeing the impact you will make.
+      </p>
+      <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:18px;">
+        Please review the details of your internship offer carefully. Should you have any questions or require any additional information, do not hesitate to reach out to the School Civics team. We are here to support you every step of the way as you begin this exciting journey.
+      </p>
+      <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:32px;">
+        We are thrilled to welcome you to the School Civics family, ${firstName}. This is only the beginning of what we know will be an outstanding chapter in your story. Congratulations — you have earned this, and we cannot wait to see what you will accomplish.
+      </p>
+      <div style="border-top:1px solid var(--border); padding-top:28px; margin-top:8px;">
+        <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:24px;">With warmest congratulations and great anticipation,</p>
+        <div style="font-family:'Playfair Display',serif; font-size:26px; font-style:italic; color:var(--ink); margin-bottom:4px;">SC Founder</div>
+        <div style="font-size:13px; color:var(--ink-light); letter-spacing:.05em;">Founder & Director, School Civics Program</div>
+        <div style="margin-top:28px; padding:16px 20px; background:var(--sage-pale); border-radius:var(--radius-sm); border-left:4px solid var(--sage);">
+          <div style="font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--sage); margin-bottom:6px;">Important Next Steps</div>
+          <div style="font-size:14px; color:var(--ink-muted); line-height:1.7;">Please confirm your acceptance by responding to this portal within <strong>7 days</strong>. Orientation details and your first-week schedule will be sent to this email address. We look forward to having you on the team.</div>
+        </div>
+        <div style="margin-top:32px; text-align:center;">
+          <button onclick="showCommitmentForm()" style="padding:16px 40px; background:var(--sage); color:white; border:none; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; transition:background .2s; letter-spacing:.02em;">✍️ Complete Form of Commitment</button>
+        </div>
+      </div>`;
+    startConfetti(true);
+  } else if (ap.status === 'Denied') {
+    box.style.borderTop = '6px solid #C0392B';
+    box.innerHTML = `
+      <div style="text-align:center; margin-bottom:36px;">
+        <div style="font-family:'Playfair Display',serif; font-size:13px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:8px;">School Civics Program</div>
+        <div style="font-family:'Playfair Display',serif; font-size:28px; font-weight:700; color:var(--ink);">Office of Intern Admissions</div>
+        <div style="width:60px; height:2px; background:var(--ink-light); margin:16px auto 0;"></div>
+      </div>
+      <p style="font-size:13px; color:var(--ink-light); margin-bottom:28px;">${dateStr}</p>
+      <p style="font-size:15px; margin-bottom:6px; color:var(--ink-muted);">Dear ${esc(ap.name)},</p>
+      <p style="font-size:20px; font-family:'Playfair Display',serif; font-weight:700; color:var(--ink); margin:24px 0; line-height:1.4;">
+        Thank you sincerely for your interest in the School Civics Internship Program and for taking the time to apply.
+      </p>
+      <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:18px;">
+        After a thorough and careful review of all applications received, the School Civics Admissions Committee has concluded its evaluation process. It is with regret that we must inform you that we are unable to offer you a position in the program at this time.
+      </p>
+      <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:18px;">
+        This was an exceptionally difficult decision. We received an extraordinary number of applications from highly motivated and talented individuals, and the level of competition this cycle was among the highest we have seen. The Admissions Committee deliberated carefully and thoughtfully, and we want you to know that your application received genuine and serious consideration.
+      </p>
+      <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:18px;">
+        Please understand that this decision is not a reflection of your worth, your potential, or your capacity for meaningful work. The qualities that lead to success in civic engagement — curiosity, empathy, perseverance, and a genuine desire to serve — are not always fully captured within the constraints of any application process.
+      </p>
+      <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:18px;">
+        We encourage you, ${firstName}, to continue pursuing your interests in civic leadership and public service. There are many paths forward, and we have no doubt that you will find one that allows your strengths to flourish. We hope you will consider applying again in a future cycle, as circumstances and capacity may change.
+      </p>
+      <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:32px;">
+        We are grateful for the time and effort you invested in your application to School Civics, and we wish you every success in your endeavors ahead. Thank you again for considering us, and for the commitment to civic life that your application represents.
+      </p>
+      <div style="border-top:1px solid var(--border); padding-top:28px; margin-top:8px;">
+        <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:24px;">With respect and best wishes,</p>
+        <div style="font-family:'Playfair Display',serif; font-size:26px; font-style:italic; color:var(--ink); margin-bottom:4px;">SC Founder</div>
+        <div style="font-size:13px; color:var(--ink-light); letter-spacing:.05em;">Founder & Director, School Civics Program</div>
+      </div>`;
+  } else {
+    box.style.borderTop = '6px solid var(--accent)';
+    box.innerHTML = `
+      <div style="text-align:center; margin-bottom:36px;">
+        <div style="font-family:'Playfair Display',serif; font-size:13px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:8px;">School Civics Program</div>
+        <div style="font-family:'Playfair Display',serif; font-size:28px; font-weight:700; color:var(--ink);">Office of Intern Admissions</div>
+        <div style="width:60px; height:2px; background:var(--accent); margin:16px auto 0;"></div>
+      </div>
+      <p style="font-size:13px; color:var(--ink-light); margin-bottom:28px;">${dateStr}</p>
+      <p style="font-size:15px; margin-bottom:6px; color:var(--ink-muted);">Dear ${esc(ap.name)},</p>
+      <p style="font-size:20px; font-family:'Playfair Display',serif; font-weight:700; color:var(--accent); margin:24px 0; line-height:1.4;">
+        Your application is currently under review.
+      </p>
+      <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:18px;">
+        Thank you for applying to the School Civics Internship Program. Our admissions committee is currently reviewing all applications and has not yet reached a final decision regarding your candidacy.
+      </p>
+      <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:32px;">
+        We appreciate your patience during this process and will notify you as soon as a decision has been made. Please check back here for updates.
+      </p>
+      <div style="border-top:1px solid var(--border); padding-top:28px;">
+        <p style="line-height:1.8; color:var(--ink-muted); margin-bottom:24px;">Sincerely,</p>
+        <div style="font-family:'Playfair Display',serif; font-size:26px; font-style:italic; color:var(--ink); margin-bottom:4px;">SC Founder</div>
+        <div style="font-size:13px; color:var(--ink-light); letter-spacing:.05em;">Founder & Director, School Civics Program</div>
+      </div>`;
+  }
+}
+
+// ─── CONFETTI ───
+let confettiInterval = null;
+function startConfetti(active) {
+  if (!active) return;
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx    = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = Array.from({length:160}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    w: Math.random() * 10 + 5,
+    h: Math.random() * 6 + 3,
+    color: ['#C4703A','#7B9E87','#E8A97A','#F5E6D8','#E8F0EB','#1A1410','#FAF7F2','#D4AF37'][Math.floor(Math.random()*8)],
+    speed: Math.random() * 3 + 1.5,
+    angle: Math.random() * Math.PI * 2,
+    spin:  (Math.random() - .5) * .15,
+    drift: (Math.random() - .5) * 1.5
+  }));
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x + p.w/2, p.y + p.h/2);
+      ctx.rotate(p.angle);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = 0.85;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      p.y     += p.speed;
+      p.x     += p.drift;
+      p.angle += p.spin;
+      if (p.y > canvas.height) {
+        p.y = -20;
+        p.x = Math.random() * canvas.width;
+      }
+    });
+    frame++;
+    if (frame < 420) confettiInterval = requestAnimationFrame(draw);
+    else { ctx.clearRect(0,0,canvas.width,canvas.height); confettiInterval = null; }
+  }
+  if (confettiInterval) cancelAnimationFrame(confettiInterval);
+  draw();
+}
+function stopConfetti() {
+  if (confettiInterval) { cancelAnimationFrame(confettiInterval); confettiInterval = null; }
+  const canvas = document.getElementById('confetti-canvas');
+  if (canvas) canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+}
+// ─── COMMITMENT FORM ───
+function showCommitmentForm() {
+  stopConfetti();
+  document.getElementById('status-letter-page').style.display = 'none';
+
+  // Reset form cleanly
+  const errBox = document.getElementById('commitment-error');
+  errBox.style.display = 'none';
+  errBox.textContent = '';
+  ['term1','term2','term3','term4','term5','term6'].forEach(id => {
+    document.getElementById(id).checked = false;
+  });
+
+  // Pre-fill from current applicant credentials
+  const firstName = currentIntern ? currentIntern.name.split(' ')[0] : '';
+  const lastName  = currentIntern ? currentIntern.name.split(' ').slice(1).join(' ') : '';
+  const email     = currentIntern ? (currentIntern.email || '') : '';
+
+  document.getElementById('cf-first').value    = firstName;
+  document.getElementById('cf-last').value     = lastName;
+  document.getElementById('cf-email').value    = email;
+  document.getElementById('cf-password').value = '';
+
+  document.getElementById('commitment-form-page').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+function backToLetter() {
+  document.getElementById('commitment-form-page').style.display = 'none';
+  document.getElementById('status-letter-page').style.display = 'block';
+}
+function submitCommitmentForm() {
+  const first    = document.getElementById('cf-first').value.trim();
+  const last     = document.getElementById('cf-last').value.trim();
+  const email    = document.getElementById('cf-email').value.trim();
+  const password = document.getElementById('cf-password').value.trim();
+  const errBox   = document.getElementById('commitment-error');
+  const terms    = ['term1','term2','term3','term4','term5','term6'];
+  const allChecked = terms.every(id => document.getElementById(id).checked);
+
+  if (!first || !last || !email || !password) {
+    errBox.textContent = 'Please fill in all required fields before submitting.';
+    errBox.style.display = 'block';
+    errBox.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  if (!allChecked) {
+    errBox.textContent = 'Please read and agree to all Terms of Agreement before submitting.';
+    errBox.style.display = 'block';
+    errBox.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  errBox.style.display = 'none';
+
+  // Save notification to localStorage
+  const fullName = first + ' ' + last;
+  const notifications = JSON.parse(localStorage.getItem('sc_notifications') || '[]');
+  notifications.push({
+    id: Date.now(),
+    name: fullName,
+    firstName: first,
+    lastName: last,
+    email: email,
+    timestamp: new Date().toISOString(),
+    read: false
+  });
+  localStorage.setItem('sc_notifications', JSON.stringify(notifications));
+
+  // Show success
+  document.getElementById('commitment-form-page').style.display = 'none';
+  document.getElementById('commitment-success-page').style.display = 'block';
+}
+
+// ─── NOTIFICATIONS (Hiring Page) ───
+function loadNotifications() {
+  const notifications = JSON.parse(localStorage.getItem('sc_notifications') || '[]');
+  const wrap = document.getElementById('commitment-notifications');
+  const list = document.getElementById('notifications-list');
+  if (!notifications.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = '';
+  notifications.forEach(n => {
+    const date = new Date(n.timestamp).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'});
+    const div = document.createElement('div');
+    div.style.cssText = 'background:var(--warm-white);border:1.5px solid var(--border);border-left:4px solid var(--sage);border-radius:var(--radius-sm);padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;animation:slideIn .25s ease;';
+    div.innerHTML = `
+      <div style="flex:1;min-width:220px;">
+        <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px;">✅ ${esc(n.name)} commitment form completed</div>
+        <div style="font-size:12px;color:var(--ink-light);">${date} · ${esc(n.email)}</div>
+      </div>
+      <button onclick="sendCommitmentEmail('${esc(n.name)}','${esc(n.email)}')" style="padding:9px 18px;background:var(--ink);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .2s;" onmouseover="this.style.background='#2E251E'" onmouseout="this.style.background='var(--ink)'">📧 Send Email to Sender</button>
+      <button onclick="dismissNotification(${n.id})" style="padding:9px 12px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink-light);cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='#C0392B';this.style.color='#C0392B'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink-light)'">Dismiss</button>
+    `;
+    list.appendChild(div);
+  });
+}
+function dismissNotification(id) {
+  let notifications = JSON.parse(localStorage.getItem('sc_notifications') || '[]');
+  notifications = notifications.filter(n => n.id !== id);
+  localStorage.setItem('sc_notifications', JSON.stringify(notifications));
+  loadNotifications();
+}
+
+function sendCommitmentEmail(name, email) {
+  const firstName = name.split(' ')[0];
+  const subject = encodeURIComponent('Welcome to School Civics — Your Commitment is Confirmed!');
+  const body = encodeURIComponent(
+`Dear ${name},
+
+We are overjoyed to confirm that your Form of Commitment has been received and that your place in the School Civics Internship Program is officially secured. This is a meaningful moment — not just for you, but for all of us at School Civics who have been looking forward to welcoming you to the team.
+
+Congratulations, ${firstName}. Thank you for committing.
+
+Your decision to join us speaks volumes about your character and your dedication to civic engagement. We knew from the moment we reviewed your application that you would be a tremendous addition to our community, and now that you have formalized your commitment, we could not be more excited for what lies ahead.
+
+As a next step, please use the login credentials below to access the School Civics team portal, where you will be able to stay up to date on announcements, tasks, and team activities:
+
+  Portal URL: Open the School Civics app
+  Username:   SC Founder
+  Password:   schoolcivics26
+
+Please keep these credentials confidential. If you have any trouble logging in or navigating the portal, do not hesitate to reach out and we will be happy to assist.
+
+Over the coming days, you will receive further details about your first week, orientation schedule, and team introductions. We want this experience to be as seamless and welcoming as possible, and our team is here to support you every step of the way.
+
+Once again, welcome to School Civics, ${firstName}. We are proud to have you with us and cannot wait to see the contributions you will make. This is the beginning of something truly special.
+
+With warm regards and great enthusiasm,
+
+SC Founder
+Founder & Director, School Civics Program`
+  );
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+}
+</script>
+</body>
+</html>
