@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -214,6 +215,20 @@
 </style>
 </head>
 <body>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay" style="position:fixed;inset:0;background:var(--cream);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
+  <div style="font-family:'Playfair Display',serif;font-size:28px;color:var(--ink);">School <em style="color:var(--accent);">Civics</em></div>
+  <div style="display:flex;gap:8px;">
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:bounce 1.2s ease-in-out infinite;"></div>
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:bounce 1.2s ease-in-out .2s infinite;"></div>
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:bounce 1.2s ease-in-out .4s infinite;"></div>
+  </div>
+  <div style="font-size:13px;color:var(--ink-light);">Connecting…</div>
+</div>
+<style>
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-10px)} }
+</style>
 
 <!-- LOGIN -->
 <div id="login-page">
@@ -611,6 +626,59 @@ const USERS = {
 };
 const MEMBER_NAMES = { naunidh: 'Naunidh Bhushan', varun: 'Varun Krishnaswamy', abhay: 'Abhay Krishnan' };
 
+// ─── GLOBAL STORAGE via GitHub Gist ───
+// Uses a GitHub Gist as a simple free database. Works across all devices.
+// The Gist ID is stored after first creation so everyone shares the same data.
+const GIST_TOKEN  = '';          // Leave blank — uses public anonymous gists
+const GIST_ID_KEY = 'sc_gist_id';
+// !! ACTION REQUIRED: After deploying, the founder must visit the site once
+// to create the Gist, then share the Gist ID in the URL or hard-code it below.
+// OR: Use the hard-coded Gist ID once created (paste it between the quotes):
+const HARDCODED_GIST_ID = '';   // e.g. 'a1b2c3d4e5f6...' — fill in after first run
+
+const GIST_FILENAME = 'sc_data.json';
+
+async function gistSave(data) {
+  const id = HARDCODED_GIST_ID || localStorage.getItem(GIST_ID_KEY);
+  const body = JSON.stringify({ files: { [GIST_FILENAME]: { content: JSON.stringify(data) } } });
+  try {
+    if (!id) {
+      // Create new public gist
+      const r = await fetch('https://api.github.com/gists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' },
+        body: JSON.stringify({ description: 'School Civics App Data', public: true,
+          files: { [GIST_FILENAME]: { content: JSON.stringify(data) } } })
+      });
+      if (r.ok) {
+        const j = await r.json();
+        localStorage.setItem(GIST_ID_KEY, j.id);
+        console.log('Gist created:', j.id, '— save this ID as HARDCODED_GIST_ID');
+      }
+    } else {
+      await fetch(`https://api.github.com/gists/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' },
+        body
+      });
+    }
+  } catch(e) { console.warn('Gist save failed', e); }
+}
+
+async function gistLoad() {
+  const id = HARDCODED_GIST_ID || localStorage.getItem(GIST_ID_KEY);
+  if (!id) return null;
+  try {
+    const r = await fetch(`https://api.github.com/gists/${id}`, {
+      headers: { 'Accept': 'application/vnd.github+json' }
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    const content = j.files?.[GIST_FILENAME]?.content;
+    return content ? JSON.parse(content) : null;
+  } catch(e) { return null; }
+}
+
 // ─── SHARED STATE ───
 let todos      = [];
 let events     = {};
@@ -621,23 +689,47 @@ let assigningTodoId  = null;
 let editingApId      = null;
 
 // ─── PERSISTENCE ───
-function save() {
+async function save() {
   try {
     localStorage.setItem('sc_todos',      JSON.stringify(todos));
     localStorage.setItem('sc_events',     JSON.stringify(events));
     localStorage.setItem('sc_applicants', JSON.stringify(applicants));
-  } catch(e) { console.warn('Storage save failed', e); }
+  } catch(e) {}
+  await gistSave({ todos, events, applicants, updatedAt: Date.now() });
 }
-function loadData() {
+
+async function loadData() {
+  // Load local cache instantly
   try {
     todos      = JSON.parse(localStorage.getItem('sc_todos'))      || [];
     events     = JSON.parse(localStorage.getItem('sc_events'))     || {};
     applicants = JSON.parse(localStorage.getItem('sc_applicants')) || [];
-  } catch(e) {
-    todos = []; events = {}; applicants = [];
+  } catch(e) { todos = []; events = {}; applicants = []; }
+
+  // Override with cloud data
+  const cloud = await gistLoad();
+  if (cloud) {
+    todos      = cloud.todos      || [];
+    events     = cloud.events     || {};
+    applicants = cloud.applicants || [];
+    try {
+      localStorage.setItem('sc_todos',      JSON.stringify(todos));
+      localStorage.setItem('sc_events',     JSON.stringify(events));
+      localStorage.setItem('sc_applicants', JSON.stringify(applicants));
+    } catch(e) {}
   }
 }
-loadData();
+
+// Boot sequence
+(async () => {
+  showLoadingOverlay(true);
+  await loadData();
+  showLoadingOverlay(false);
+})();
+
+function showLoadingOverlay(show) {
+  document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+}
 
 // ─── AUTH ───
 function hideAllPages() {
@@ -1179,15 +1271,13 @@ function showMainLogin() {
   document.getElementById('intern-login-page').style.display = 'none';
   document.getElementById('login-page').style.display = 'flex';
 }
-function doInternLogin() {
+async function doInternLogin() {
   const email = document.getElementById('intern-email-input').value.trim().toLowerCase();
   const pass  = document.getElementById('intern-password-input').value;
-  // Always read fresh from localStorage so cross-session/cross-device works
-  let data = [];
-  try { data = JSON.parse(localStorage.getItem('sc_applicants') || '[]'); } catch(e) {}
+  const cloud = await gistLoad();
+  const data  = (cloud && cloud.applicants) ? cloud.applicants : applicants;
   const ap = data.find(a => a.email && a.email.trim().toLowerCase() === email && a.password === pass);
   if (ap) {
-    // Always use the freshest copy of this applicant's data
     currentIntern = ap;
     document.getElementById('intern-login-page').style.display = 'none';
     document.getElementById('intern-error-msg').classList.remove('show');
@@ -1226,14 +1316,15 @@ function backToPortal() {
 }
 
 // ─── STATUS LETTER ───
-function showStatusLetter() {
+async function showStatusLetter() {
   document.getElementById('intern-portal-page').style.display = 'none';
   const lp = document.getElementById('status-letter-page');
   lp.style.display = 'block';
-  // Always re-read the freshest status from localStorage
+  // Always fetch freshest status from cloud
   let freshAp = currentIntern;
   try {
-    const data = JSON.parse(localStorage.getItem('sc_applicants') || '[]');
+    const cloud = await gistLoad();
+    const data  = (cloud && cloud.applicants) ? cloud.applicants : applicants;
     const updated = data.find(a => a.email && currentIntern.email && a.email.toLowerCase() === currentIntern.email.toLowerCase());
     if (updated) { currentIntern = updated; freshAp = updated; }
   } catch(e) {}
