@@ -237,7 +237,19 @@
       <input type="password" id="password-input" placeholder="Enter your password" autocomplete="current-password">
     </div>
     <button class="btn-primary" onclick="doLogin()">Sign In →</button>
-    <div style="text-align:center; margin-top:20px;">
+    <div id="touchid-wrap" style="display:none; margin-top:16px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <span style="font-size:12px;color:var(--ink-light);letter-spacing:.06em;text-transform:uppercase;">or</span>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
+      <button id="touchid-btn" onclick="doTouchID()" style="width:100%;padding:14px;background:var(--cream);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="10"/><path d="M12 8c-2.2 0-4 1.8-4 4"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><path d="M12 13.5v3"/><path d="M9.5 17.5a4.5 4.5 0 0 0 5 0"/></svg>
+        Sign in with Touch ID
+      </button>
+      <div id="touchid-status" style="font-size:13px;text-align:center;margin-top:10px;min-height:18px;color:var(--ink-light);"></div>
+    </div>
+    <div style="text-align:center; margin-top:16px;">
       <button onclick="showInternLogin()" style="background:none;border:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Applicant Sign In</button>
     </div>
   </div>
@@ -656,6 +668,106 @@ function doLogin() {
   }
 }
 
+// ─── TOUCH ID (WebAuthn) — SC Founder only ───
+const TOUCH_ID_CRED_KEY = 'sc_touchid_credId';
+const TOUCH_ID_RP_ID    = location.hostname; // always matches the actual domain
+const TOUCH_ID_USER_ID  = new Uint8Array([83,67,70,111,117,110,100,101,114]); // "SCFounder"
+
+async function checkTouchIDSupport() {
+  // Only works on HTTPS (or localhost)
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
+  if (!window.PublicKeyCredential) return;
+  // Show the button immediately — then check if platform authenticator is available
+  document.getElementById('touchid-wrap').style.display = 'block';
+  const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(()=>false);
+  if (!available) {
+    // Still show but explain
+    document.getElementById('touchid-status').textContent = 'Touch ID not available on this device.';
+  }
+}
+checkTouchIDSupport();
+
+async function doTouchID() {
+  const statusEl = document.getElementById('touchid-status');
+  const btn      = document.getElementById('touchid-btn');
+  const storedId = localStorage.getItem(TOUCH_ID_CRED_KEY);
+
+  btn.style.opacity = '0.6';
+  btn.style.pointerEvents = 'none';
+  statusEl.style.color = 'var(--ink-light)';
+  statusEl.textContent = storedId ? 'Waiting for Touch ID…' : 'Registering Touch ID…';
+
+  try {
+    if (!storedId) {
+      // First time: register a passkey for SC Founder
+      const regOptions = {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rp: { id: TOUCH_ID_RP_ID, name: 'School Civics' },
+        user: { id: TOUCH_ID_USER_ID, name: 'SC Founder', displayName: 'SC Founder' },
+        pubKeyCredParams: [
+          { type: 'public-key', alg: -7 },   // ES256
+          { type: 'public-key', alg: -257 }  // RS256
+        ],
+        authenticatorSelection: {
+          authenticatorAttachment: 'platform',
+          userVerification: 'required',
+          residentKey: 'preferred'
+        },
+        timeout: 60000
+      };
+      const cred = await navigator.credentials.create({ publicKey: regOptions });
+      const credIdB64 = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+      localStorage.setItem(TOUCH_ID_CRED_KEY, credIdB64);
+      statusEl.style.color = 'var(--sage)';
+      statusEl.textContent = '✓ Touch ID set up! Signing you in…';
+      setTimeout(() => loginAsFounder(), 700);
+    } else {
+      // Already registered: authenticate
+      const rawCredId = Uint8Array.from(atob(storedId), c => c.charCodeAt(0));
+      const authOptions = {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rpId: TOUCH_ID_RP_ID,
+        allowCredentials: [{ type: 'public-key', id: rawCredId, transports: ['internal'] }],
+        userVerification: 'required',
+        timeout: 60000
+      };
+      await navigator.credentials.get({ publicKey: authOptions });
+      statusEl.style.color = 'var(--sage)';
+      statusEl.textContent = '✓ Verified!';
+      setTimeout(() => loginAsFounder(), 500);
+    }
+  } catch(err) {
+    btn.style.opacity = '';
+    btn.style.pointerEvents = '';
+    if (err.name === 'NotAllowedError') {
+      statusEl.style.color = '#C0392B';
+      statusEl.textContent = 'Touch ID cancelled or timed out. Try again.';
+    } else if (err.name === 'InvalidStateError') {
+      localStorage.removeItem(TOUCH_ID_CRED_KEY);
+      statusEl.style.color = '#C0392B';
+      statusEl.textContent = 'Credential reset — tap again to re-register.';
+    } else if (err.name === 'NotSupportedError') {
+      statusEl.style.color = '#C0392B';
+      statusEl.textContent = 'Touch ID not supported on this browser/device.';
+    } else {
+      statusEl.style.color = '#C0392B';
+      statusEl.textContent = 'Error: ' + err.message;
+    }
+  }
+}
+
+function loginAsFounder() {
+  currentUser = { username: 'SC Founder', ...USERS['SC Founder'] };
+  document.getElementById('error-msg').classList.remove('show');
+  hideAllPages();
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app-page').style.display = 'block';
+  document.getElementById('touchid-status').textContent = '';
+  document.getElementById('touchid-btn').style.opacity = '';
+  document.getElementById('touchid-btn').style.pointerEvents = '';
+  setupUI(); setGreeting(); renderTodos(); renderCalendar();
+}
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('login-page').style.display !== 'none') doLogin();
   if (e.key === 'Escape') { closeAssignModal(); closeEvModal(); closeApModal(); closeAllMenus(); }
@@ -1070,11 +1182,15 @@ function showMainLogin() {
 function doInternLogin() {
   const email = document.getElementById('intern-email-input').value.trim().toLowerCase();
   const pass  = document.getElementById('intern-password-input').value;
-  const data  = JSON.parse(localStorage.getItem('sc_applicants') || '[]');
-  const ap    = data.find(a => a.email && a.email.toLowerCase() === email && a.password === pass);
+  // Always read fresh from localStorage so cross-session/cross-device works
+  let data = [];
+  try { data = JSON.parse(localStorage.getItem('sc_applicants') || '[]'); } catch(e) {}
+  const ap = data.find(a => a.email && a.email.trim().toLowerCase() === email && a.password === pass);
   if (ap) {
+    // Always use the freshest copy of this applicant's data
     currentIntern = ap;
     document.getElementById('intern-login-page').style.display = 'none';
+    document.getElementById('intern-error-msg').classList.remove('show');
     showInternPortal();
   } else {
     document.getElementById('intern-error-msg').classList.add('show');
@@ -1114,7 +1230,14 @@ function showStatusLetter() {
   document.getElementById('intern-portal-page').style.display = 'none';
   const lp = document.getElementById('status-letter-page');
   lp.style.display = 'block';
-  const ap = currentIntern;
+  // Always re-read the freshest status from localStorage
+  let freshAp = currentIntern;
+  try {
+    const data = JSON.parse(localStorage.getItem('sc_applicants') || '[]');
+    const updated = data.find(a => a.email && currentIntern.email && a.email.toLowerCase() === currentIntern.email.toLowerCase());
+    if (updated) { currentIntern = updated; freshAp = updated; }
+  } catch(e) {}
+  const ap = freshAp;
   const today = new Date();
   const dateStr = today.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
   const firstName = ap.name.split(' ')[0];
@@ -1360,7 +1483,7 @@ function loadNotifications() {
         <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px;">✅ ${esc(n.name)} commitment form completed</div>
         <div style="font-size:12px;color:var(--ink-light);">${date} · ${esc(n.email)}</div>
       </div>
-      <button onclick="sendCommitmentEmail('${esc(n.name)}','${esc(n.email)}')" style="padding:9px 18px;background:var(--ink);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .2s;" onmouseover="this.style.background='#2E251E'" onmouseout="this.style.background='var(--ink)'">📧 Send Email to Sender</button>
+      <button onclick="openReviewModal(${n.id})" style="padding:9px 18px;background:var(--sage);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .2s;" onmouseover="this.style.background='#6a8e76'" onmouseout="this.style.background='var(--sage)'">🔍 Review and Accept</button>
       <button onclick="dismissNotification(${n.id})" style="padding:9px 12px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink-light);cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='#C0392B';this.style.color='#C0392B'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink-light)'">Dismiss</button>
     `;
     list.appendChild(div);
@@ -1371,6 +1494,29 @@ function dismissNotification(id) {
   notifications = notifications.filter(n => n.id !== id);
   localStorage.setItem('sc_notifications', JSON.stringify(notifications));
   loadNotifications();
+}
+
+// ─── REVIEW MODAL ───
+function openReviewModal(id) {
+  const notifications = JSON.parse(localStorage.getItem('sc_notifications') || '[]');
+  const n = notifications.find(x => x.id === id);
+  if (!n) return;
+
+  const date = new Date(n.timestamp).toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+
+  const modal = document.getElementById('review-modal');
+  document.getElementById('rm-name').textContent    = n.name;
+  document.getElementById('rm-email').textContent   = n.email;
+  document.getElementById('rm-date').textContent    = date;
+  document.getElementById('rm-initials').textContent = (n.firstName?.[0]||'') + (n.lastName?.[0]||'');
+  document.getElementById('rm-accept-btn').onclick  = () => { closeReviewModal(); sendCommitmentEmail(n.name, n.email); dismissNotification(id); };
+  modal.classList.add('open');
+}
+function closeReviewModal() {
+  document.getElementById('review-modal').classList.remove('open');
 }
 
 function sendCommitmentEmail(name, email) {
@@ -1405,5 +1551,51 @@ Founder & Director, School Civics Program`
   window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 }
 </script>
-</body>
-</html>
+
+<!-- REVIEW MODAL -->
+<div class="modal-overlay" id="review-modal" onclick="if(event.target===this)closeReviewModal()" style="z-index:1000;">
+  <div class="modal-box" style="width:520px; max-width:92vw;">
+    <button class="modal-close" onclick="closeReviewModal()">×</button>
+
+    <div style="display:flex; align-items:center; gap:16px; margin-bottom:28px;">
+      <div id="rm-initials" style="width:52px;height:52px;border-radius:50%;background:var(--sage-pale);color:var(--sage);font-family:'Playfair Display',serif;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--sage);margin-bottom:4px;">Commitment Form Submission</div>
+        <div id="rm-name" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--ink);"></div>
+      </div>
+    </div>
+
+    <div style="background:var(--cream);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:20px 24px;margin-bottom:20px;display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div style="width:32px;height:32px;background:var(--warm-white);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">📧</div>
+        <div>
+          <div style="font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);margin-bottom:2px;">Email Address</div>
+          <div id="rm-email" style="font-size:15px;color:var(--ink);"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div style="width:32px;height:32px;background:var(--warm-white);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🕐</div>
+        <div>
+          <div style="font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);margin-bottom:2px;">Submitted</div>
+          <div id="rm-date" style="font-size:15px;color:var(--ink);"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:32px;height:32px;background:var(--warm-white);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">✅</div>
+        <div>
+          <div style="font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);margin-bottom:2px;">Terms of Agreement</div>
+          <div style="font-size:15px;color:var(--sage);font-weight:500;">All 6 terms agreed to</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size:13px;color:var(--ink-light);line-height:1.7;margin-bottom:20px;">Pressing <strong>Accept</strong> will open a pre-drafted welcome email to this applicant containing their portal login credentials. You can review and send it at your discretion.</p>
+
+    <div class="modal-divider"></div>
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button onclick="closeReviewModal()" style="flex:1;padding:13px;background:transparent;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--ink-muted);cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--ink-muted)'" onmouseout="this.style.borderColor='var(--border)'">Cancel</button>
+      <button id="rm-accept-btn" style="flex:2;padding:13px;background:var(--sage);color:white;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='#6a8e76'" onmouseout="this.style.background='var(--sage)'">✅ Accept & Send Welcome Email</button>
+    </div>
+  </div>
+</div>
+</body></html>
