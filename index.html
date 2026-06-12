@@ -1,817 +1,613 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Speech & Debate Ballot System</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
 <style>
-:root {
-  --cream:#FAF7F2; --warm-white:#FEFCF9; --ink:#1A1410; --ink-muted:#5C4F42;
-  --ink-light:#9C8E82; --accent:#C4703A; --accent-light:#E8A97A; --accent-pale:#F5E6D8;
-  --sage:#7B9E87; --sage-pale:#E8F0EB; --border:rgba(92,79,66,0.15);
-  --shadow:0 4px 24px rgba(26,20,16,0.08); --shadow-lg:0 12px 48px rgba(26,20,16,0.14);
-  --radius:16px; --radius-sm:10px;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+  @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body, #app { font-family: 'Roboto', Arial, sans-serif; background: #fff; color: #202124; }
+  .page { display: none; min-height: 600px; }
+  .page.active { display: block; }
 
-/* ── LANDING ── */
-#landing{min-height:100vh;display:flex;align-items:stretch;position:relative;z-index:1}
-.land-left{flex:1;background:var(--ink);display:flex;flex-direction:column;justify-content:center;padding:72px 64px;position:relative;overflow:hidden}
-.land-left::before{content:'';position:absolute;top:-120px;right:-120px;width:400px;height:400px;background:radial-gradient(circle,var(--accent) 0%,transparent 70%);opacity:.25;border-radius:50%}
-.land-left::after{content:'';position:absolute;bottom:-80px;left:-80px;width:300px;height:300px;background:radial-gradient(circle,var(--sage) 0%,transparent 70%);opacity:.2;border-radius:50%}
-.land-brand{position:relative;z-index:2}
-.logo-mark{width:52px;height:52px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:48px;font-family:'Playfair Display',serif;font-size:14px;color:white;font-weight:700;letter-spacing:.02em}
-.land-left h1{font-family:'Playfair Display',serif;font-size:52px;color:var(--warm-white);line-height:1.1;margin-bottom:20px}
-.land-left h1 em{color:var(--accent-light);font-style:italic}
-.land-left p{color:var(--ink-light);font-size:16px;line-height:1.7;max-width:340px;font-weight:300}
-.land-right{width:480px;background:var(--warm-white);display:flex;flex-direction:column;justify-content:center;padding:72px 56px}
-.land-right h2{font-family:'Playfair Display',serif;font-size:32px;margin-bottom:8px}
-.land-right .subtitle{color:var(--ink-light);font-size:14px;margin-bottom:40px;font-weight:300}
-.land-btn{width:100%;padding:15px;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.02em;margin-bottom:12px}
-.land-btn-primary{background:var(--ink);color:var(--warm-white)}
-.land-btn-primary:hover{background:#2E251E}
-.land-btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--border)}
-.land-btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+  /* Google colors */
+  .g-blue { color: #1a73e8; }
+  .g-red { color: #ea4335; }
+  .g-yellow { color: #fbbc04; }
+  .g-green { color: #34a853; }
 
-/* ── JUDGE LOGIN ── */
-#judge-login,#p-login{min-height:100vh;display:none;align-items:stretch;position:relative;z-index:1}
-.login-left{flex:1;background:var(--ink);display:flex;flex-direction:column;justify-content:center;padding:72px 64px;position:relative;overflow:hidden}
-.login-left::before{content:'';position:absolute;top:-120px;right:-120px;width:400px;height:400px;background:radial-gradient(circle,var(--accent) 0%,transparent 70%);opacity:.25;border-radius:50%}
-.login-left::after{content:'';position:absolute;bottom:-80px;left:-80px;width:300px;height:300px;background:radial-gradient(circle,var(--sage) 0%,transparent 70%);opacity:.2;border-radius:50%}
-.login-brand{position:relative;z-index:2}
-.login-brand h1{font-family:'Playfair Display',serif;font-size:52px;color:var(--warm-white);line-height:1.1;margin-bottom:20px}
-.login-brand h1 em{color:var(--accent-light);font-style:italic}
-.login-brand p{color:var(--ink-light);font-size:16px;line-height:1.7;max-width:340px;font-weight:300}
-.login-right{width:480px;background:var(--warm-white);display:flex;flex-direction:column;justify-content:center;padding:72px 56px}
-.login-right h2{font-family:'Playfair Display',serif;font-size:32px;margin-bottom:8px}
-.login-right .subtitle{color:var(--ink-light);font-size:14px;margin-bottom:40px;font-weight:300}
-.form-group{margin-bottom:20px}
-.form-group label{display:block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 18px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;color:var(--ink);background:var(--cream);outline:none;transition:border-color .2s,box-shadow .2s}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(196,112,58,.12)}
-.form-group input::placeholder,.form-group textarea::placeholder{color:var(--ink-light)}
-.form-group select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239C8E82' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;background-color:var(--cream)}
-.error-msg{background:#FDECEA;border:1px solid #F5C6BF;color:#C0392B;border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;margin-bottom:20px;display:none}
-.error-msg.show{display:block}
-.btn-primary{width:100%;padding:15px;background:var(--ink);color:var(--warm-white);border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.02em;margin-top:8px}
-.btn-primary:hover{background:#2E251E}
-.btn-primary:active{transform:scale(.99)}
-.back-link{text-align:center;margin-top:20px}
-.back-link button{background:none;border:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink-muted);cursor:pointer}
-.back-link button:hover{color:var(--accent)}
+  /* Login page */
+  .login-bg { background: #fff; min-height: 600px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .login-logo { display: flex; align-items: center; gap: 2px; font-size: 36px; font-weight: 700; font-family: 'Google Sans', sans-serif; margin-bottom: 8px; }
+  .login-logo span { letter-spacing: -1px; }
+  .login-subtitle { font-size: 16px; color: #5f6368; margin-bottom: 32px; font-family: 'Google Sans'; }
+  .login-box { background: #fff; border: 1px solid #dadce0; border-radius: 8px; padding: 40px 48px; width: 360px; }
+  .login-box h2 { font-family: 'Google Sans'; font-weight: 400; font-size: 24px; text-align: center; color: #202124; margin-bottom: 8px; }
+  .login-box p { text-align: center; color: #5f6368; font-size: 14px; margin-bottom: 24px; }
+  .g-input { width: 100%; border: 1px solid #dadce0; border-radius: 4px; padding: 13px 15px; font-size: 16px; outline: none; font-family: Roboto; color: #202124; background: #fff; transition: border 0.2s; margin-bottom: 12px; }
+  .g-input:focus { border: 2px solid #1a73e8; padding: 12px 14px; }
+  .g-btn { background: #1a73e8; color: #fff; border: none; border-radius: 4px; padding: 10px 24px; font-size: 14px; font-family: 'Google Sans'; font-weight: 500; cursor: pointer; transition: background 0.2s, box-shadow 0.2s; }
+  .g-btn:hover { background: #1765cc; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .g-btn-outline { background: transparent; color: #1a73e8; border: 1px solid #dadce0; border-radius: 4px; padding: 10px 24px; font-size: 14px; font-family: 'Google Sans'; font-weight: 500; cursor: pointer; }
+  .g-btn-outline:hover { background: #f8f9ff; }
+  .login-footer { text-align: center; margin-top: 20px; font-size: 14px; color: #5f6368; }
+  .login-footer a { color: #1a73e8; text-decoration: none; cursor: pointer; }
+  .error-msg { color: #ea4335; font-size: 12px; margin-top: -8px; margin-bottom: 8px; display: none; }
 
-/* ── APP SHELL ── */
-#portal{display:none;min-height:100vh;position:relative;z-index:1;flex-direction:column}
-.app-bar{height:64px;background:var(--warm-white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
-.app-bar .brand{font-family:'Playfair Display',serif;font-size:20px;color:var(--ink);margin-right:auto;display:flex;align-items:center;gap:10px}
-.app-bar .brand span{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:700}
-.nav-tabs{display:flex;gap:4px;background:var(--cream);padding:4px;border-radius:var(--radius-sm);margin-right:20px}
-.nav-tab{padding:7px 18px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--ink-muted);cursor:pointer;border-radius:7px;transition:all .2s}
-.nav-tab.active{background:var(--warm-white);color:var(--ink);box-shadow:var(--shadow)}
-.nav-tab:hover:not(.active){color:var(--ink)}
-.user-pill{display:flex;align-items:center;gap:8px;margin-right:16px}
-.user-avatar-sm{width:30px;height:30px;border-radius:50%;background:var(--accent-pale);color:var(--accent);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.user-name-sm{font-size:13px;font-weight:500;color:var(--ink-muted)}
-.logout-btn{padding:8px 16px;background:transparent;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink-muted);cursor:pointer;transition:all .2s}
-.logout-btn:hover{border-color:var(--accent);color:var(--accent)}
-.page{display:none;padding:48px 64px;max-width:1100px;margin:0 auto}
-.page.active{display:block}
-.page-header{margin-bottom:40px}
-.page-header h2{font-family:'Playfair Display',serif;font-size:40px}
-.page-header p{color:var(--ink-light);font-size:15px;margin-top:6px;font-weight:300}
+  /* Top bar */
+  .topbar { background: #fff; border-bottom: 1px solid #e8eaed; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .topbar-logo { display: flex; align-items: center; gap: 6px; font-size: 22px; font-weight: 700; font-family: 'Google Sans'; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: #1a73e8; color: #fff; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .sign-out-btn { font-size: 13px; color: #5f6368; cursor: pointer; border: 1px solid #dadce0; border-radius: 4px; padding: 6px 12px; background: #fff; font-family: Roboto; }
+  .sign-out-btn:hover { background: #f8f9fa; }
 
-/* ── PARTICIPANT CARDS ── */
-.participant-grid{display:flex;flex-direction:column;gap:12px}
-.applicant-card{background:var(--warm-white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:20px 24px;display:flex;align-items:center;gap:18px;transition:box-shadow .2s,border-color .2s;animation:slideIn .25s ease}
-@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.applicant-card:hover{box-shadow:var(--shadow);border-color:rgba(196,112,58,.25)}
-.ap-avatar{width:44px;height:44px;border-radius:50%;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;background:var(--accent-pale);color:var(--accent)}
-.ap-info{flex:1;min-width:0}
-.ap-name{font-size:16px;font-weight:600;color:var(--ink);margin-bottom:4px}
-.ap-notes{font-size:13px;color:var(--ink-light);font-weight:300}
-.ap-btns{display:flex;gap:8px;flex-shrink:0;align-items:center}
-.ap-btn{border:none;background:transparent;cursor:pointer;width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s;color:var(--ink-light)}
-.ap-btn:hover{background:var(--accent-pale);color:var(--accent)}
-.btn-add-part{padding:12px 24px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
-.btn-add-part:hover{background:#B5602E}
-.empty-state{text-align:center;padding:64px 0;color:var(--ink-light)}
-.empty-state .icon{font-size:48px;margin-bottom:16px}
-.empty-state p{font-size:16px;font-weight:300}
+  /* Tabs */
+  .tabs { border-bottom: 1px solid #e8eaed; display: flex; padding: 0 24px; background: #fff; }
+  .tab { padding: 16px 20px; font-size: 14px; font-weight: 500; color: #5f6368; cursor: pointer; border-bottom: 3px solid transparent; font-family: 'Google Sans'; transition: color 0.2s; }
+  .tab:hover { color: #1a73e8; background: #f8f9ff; }
+  .tab.active { color: #1a73e8; border-bottom-color: #1a73e8; }
 
-/* ── PLACINGS ── */
-.sub-tabs{display:flex;gap:4px;background:var(--cream);padding:4px;border-radius:var(--radius-sm);margin-bottom:32px;width:fit-content}
-.sub-tab{padding:7px 20px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--ink-muted);cursor:pointer;border-radius:7px;transition:all .2s}
-.sub-tab.active{background:var(--warm-white);color:var(--ink);box-shadow:var(--shadow)}
-.sub-tab:hover:not(.active){color:var(--ink)}
-.sub-page{display:none}
-.sub-page.active{display:block}
+  /* Content area */
+  .content { padding: 24px; max-width: 900px; margin: 0 auto; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .section-title { font-size: 20px; font-family: 'Google Sans'; font-weight: 400; color: #202124; }
 
-.finals-list{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
-.finals-item{background:var(--warm-white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;display:flex;align-items:center;gap:16px;transition:all .2s}
-.finals-item:hover{border-color:rgba(196,112,58,.3);box-shadow:var(--shadow)}
-.finals-cb{width:22px;height:22px;border:2px solid var(--border);border-radius:6px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;background:white}
-.finals-cb:hover{border-color:var(--accent)}
-.finals-cb.checked{background:var(--sage);border-color:var(--sage)}
-.finals-cb svg{display:none}
-.finals-cb.checked svg{display:block}
-.finals-name{flex:1;font-size:15px;font-weight:500;color:var(--ink)}
-.finals-meta{font-size:12px;color:var(--ink-light)}
-.btn-save-finals{padding:14px 32px;background:var(--ink);color:white;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.02em}
-.btn-save-finals:hover{background:#2E251E}
-.btn-save-finals:active{transform:scale(.99)}
+  /* Report card */
+  .report-card { background: #fff; border: 1px solid #dadce0; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+  .report-card-title { font-size: 16px; font-weight: 500; font-family: 'Google Sans'; color: #202124; margin-bottom: 8px; }
+  .report-meta { font-size: 13px; color: #5f6368; display: flex; gap: 16px; align-items: center; }
+  .score-badge { background: #e8f0fe; color: #1a73e8; padding: 3px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; }
 
-/* RANKINGS TABLE */
-.rankings-table{width:100%;border-collapse:collapse;background:var(--warm-white);border-radius:var(--radius-sm);overflow:hidden;border:1.5px solid var(--border);box-shadow:var(--shadow)}
-.rankings-table th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);padding:14px 20px;background:var(--cream);border-bottom:1px solid var(--border)}
-.rankings-table td{padding:16px 20px;border-bottom:1px solid var(--border);vertical-align:middle}
-.rankings-table tr:last-child td{border-bottom:none}
-.place-badge{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
-.place-1{background:var(--accent-pale);color:var(--accent)}
-.place-2{background:#F0F0F0;color:#888}
-.place-3{background:#F5EAD8;color:#a0622a}
-.place-n{background:var(--cream);color:var(--ink-muted)}
-.rate-dots{display:flex;gap:3px;flex-wrap:nowrap}
-.rate-dot{width:7px;height:7px;border-radius:50%;background:var(--cream);border:1px solid var(--border)}
-.rate-dot.on{background:var(--accent);border-color:var(--accent)}
+  /* Editor toolbar */
+  .editor-toolbar { display: flex; gap: 4px; padding: 8px; border: 1px solid #dadce0; border-bottom: none; border-radius: 4px 4px 0 0; background: #f8f9fa; flex-wrap: wrap; align-items: center; }
+  .tool-btn { background: transparent; border: none; border-radius: 4px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #444746; transition: background 0.15s; }
+  .tool-btn:hover { background: #e8eaed; }
+  .tool-btn.active { background: #e8f0fe; color: #1a73e8; }
+  .tool-sep { width: 1px; height: 24px; background: #dadce0; margin: 0 4px; }
+  .editor-area { width: 100%; border: 1px solid #dadce0; border-radius: 0 0 4px 4px; padding: 14px; font-size: 15px; font-family: Roboto; outline: none; min-height: 220px; color: #202124; resize: vertical; line-height: 1.6; }
+  .editor-area:focus { border-color: #1a73e8; border-width: 2px; padding: 13px; }
 
-/* ── MODALS ── */
-.modal-overlay{position:fixed;inset:0;z-index:999;background:rgba(26,20,16,.45);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
-.modal-overlay.open{opacity:1;pointer-events:all}
-.modal-box{background:var(--warm-white);border-radius:var(--radius);padding:36px 40px;width:580px;max-width:92vw;box-shadow:var(--shadow-lg);position:relative;transform:translateY(12px);transition:transform .25s ease;max-height:88vh;overflow-y:auto}
-.modal-overlay.open .modal-box{transform:translateY(0)}
-.modal-close{position:absolute;top:16px;right:18px;border:none;background:transparent;font-size:22px;color:var(--ink-light);cursor:pointer;line-height:1;border-radius:6px;padding:2px 6px;transition:all .15s}
-.modal-close:hover{background:var(--cream);color:var(--ink)}
-.modal-tag{display:inline-block;background:var(--accent-pale);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:14px}
-.modal-title{font-family:'Playfair Display',serif;font-size:24px;color:var(--ink);margin-bottom:20px;line-height:1.2}
-.modal-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
-.modal-icon{width:32px;height:32px;background:var(--cream);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;margin-top:1px}
-.modal-lbl{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-light);margin-bottom:2px}
-.modal-val{font-size:15px;color:var(--ink);line-height:1.5}
-.modal-divider{height:1px;background:var(--border);margin:20px 0}
-.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  /* Score field */
+  .score-row { display: flex; align-items: center; gap: 8px; margin-top: 16px; }
+  .score-label { font-size: 14px; color: #5f6368; font-family: 'Google Sans'; }
+  .score-input { width: 56px; border: 1px solid #dadce0; border-radius: 4px; padding: 8px; font-size: 14px; text-align: center; outline: none; color: #202124; background: #fff; }
+  .score-input:focus { border-color: #1a73e8; border-width: 2px; }
+  .score-slash { font-size: 18px; color: #5f6368; }
 
-/* STOPWATCH */
-.sw-wrap{border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--cream);padding:20px;text-align:center}
-.sw-display{font-family:'Playfair Display',serif;font-size:44px;color:var(--ink);letter-spacing:4px;margin-bottom:16px}
-.sw-btns{display:flex;gap:8px;justify-content:center}
-.sw-btn{padding:9px 24px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;letter-spacing:.02em}
-.sw-start{background:var(--sage);color:white}.sw-start:hover{background:#6a8e76}
-.sw-stop{background:#C0392B;color:white}.sw-stop:hover{background:#a93226}
-.sw-reset{background:var(--cream);color:var(--ink-muted);border:1.5px solid var(--border)}.sw-reset:hover{border-color:var(--ink-muted)}
+  /* Applicant card */
+  .applicant-card { background: #fff; border: 1px solid #dadce0; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+  .applicant-name { font-size: 16px; font-weight: 500; font-family: 'Google Sans'; color: #202124; margin-bottom: 4px; }
+  .applicant-email { font-size: 13px; color: #5f6368; margin-bottom: 12px; }
+  .report-assign { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .g-select { border: 1px solid #dadce0; border-radius: 4px; padding: 8px 12px; font-size: 14px; background: #fff; color: #202124; outline: none; cursor: pointer; font-family: Roboto; }
+  .g-select:focus { border-color: #1a73e8; }
+  .chip { background: #e8f0fe; color: #1a73e8; border-radius: 16px; padding: 4px 12px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .chip-remove { cursor: pointer; font-size: 16px; color: #5f6368; }
 
-/* RTE */
-.rte-toolbar{display:flex;flex-wrap:wrap;gap:4px;padding:8px;border:1.5px solid var(--border);border-bottom:none;border-radius:var(--radius-sm) var(--radius-sm) 0 0;background:var(--cream)}
-.rte-btn{padding:5px 10px;background:var(--warm-white);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;color:var(--ink);transition:all .15s;min-width:30px;text-align:center;line-height:1.4}
-.rte-btn:hover{background:var(--ink);color:white;border-color:var(--ink)}
-.rte-editor{min-height:140px;padding:14px 18px;border:1.5px solid var(--border);border-radius:0 0 var(--radius-sm) var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.65;color:var(--ink);background:var(--warm-white);outline:none}
-.rte-editor:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(196,112,58,.1)}
+  /* Modal */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: none; align-items: center; justify-content: center; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: #fff; border-radius: 8px; padding: 32px; width: 420px; max-width: 95vw; }
+  .modal h3 { font-family: 'Google Sans'; font-size: 20px; font-weight: 400; margin-bottom: 20px; color: #202124; }
+  .modal label { font-size: 13px; color: #5f6368; display: block; margin-bottom: 4px; margin-top: 12px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
 
-.modal-footer-btns{display:flex;gap:10px;margin-top:4px}
-.btn-cancel-modal{flex:1;padding:13px;background:transparent;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--ink-muted);cursor:pointer;transition:all .2s}
-.btn-cancel-modal:hover{border-color:var(--ink-muted)}
-.btn-save-modal{flex:2;padding:13px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
-.btn-save-modal:hover{background:#B5602E}
+  /* Notification bell */
+  .notif-btn { position: relative; background: none; border: none; cursor: pointer; padding: 4px; }
+  .notif-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: #ea4335; border-radius: 50%; border: 2px solid #fff; }
+  .notif-panel { position: absolute; right: 60px; top: 60px; background: #fff; border: 1px solid #dadce0; border-radius: 8px; width: 320px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); z-index: 150; display: none; }
+  .notif-panel.open { display: block; }
+  .notif-header { padding: 16px 20px; border-bottom: 1px solid #e8eaed; font-family: 'Google Sans'; font-size: 16px; font-weight: 500; }
+  .notif-item { padding: 16px 20px; border-bottom: 1px solid #f1f3f4; cursor: pointer; transition: background 0.15s; }
+  .notif-item:hover { background: #f8f9fa; }
+  .notif-item-title { font-size: 14px; font-weight: 500; color: #202124; margin-bottom: 4px; }
+  .notif-item-sub { font-size: 13px; color: #5f6368; }
 
-/* ── PARTICIPANT PORTAL ── */
-#p-portal{display:none;min-height:100vh;position:relative;z-index:1}
-.pp-bar{height:64px;background:var(--warm-white);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between}
-.pp-bar-brand{font-family:'Playfair Display',serif;font-size:20px;display:flex;align-items:center;gap:10px}
-.pp-bar-brand span{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:700}
+  /* Score modal */
+  .score-display { text-align: center; padding: 24px 0; }
+  .score-pct { font-size: 56px; font-weight: 700; font-family: 'Google Sans'; }
+  .score-pct.pass { color: #34a853; }
+  .score-pct.fail { color: #ea4335; }
 
-/* STATUS LETTER */
-#status-page{display:none;min-height:100vh;position:relative;z-index:1;background:var(--cream)}
-.confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999}
+  /* Report view */
+  .report-view { background: #f8f9fa; border: 1px solid #e8eaed; border-radius: 8px; padding: 24px; margin-top: 16px; font-size: 15px; line-height: 1.7; color: #202124; white-space: pre-wrap; }
+  .report-name-big { font-size: 22px; font-family: 'Google Sans'; font-weight: 500; margin-bottom: 16px; color: #202124; }
 
-/* FINALISTS MODAL */
-.finalist-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
-.finalist-row:last-child{border-bottom:none}
-.finalist-avatar{width:36px;height:36px;border-radius:50%;background:var(--sage-pale);color:var(--sage);font-family:'Playfair Display',serif;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  /* Confetti canvas */
+  #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: none; }
 
-/* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:white;padding:14px 24px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;border-left:3px solid var(--accent);z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none}
-.toast.show{transform:translateY(0);opacity:1}
-
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-@media(max-width:900px){.login-left,.land-left{display:none}.login-right,.land-right{width:100%}.page{padding:32px 20px}.app-bar{padding:0 16px}}
+  /* Misc */
+  .empty-state { text-align: center; padding: 48px 0; color: #9aa0a6; }
+  .empty-state i { font-size: 48px; display: block; margin-bottom: 12px; }
+  .role-btns { display: flex; gap: 16px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
+  .role-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px 28px; border: 1px solid #dadce0; border-radius: 8px; cursor: pointer; background: #fff; transition: border-color 0.2s, box-shadow 0.2s; min-width: 140px; }
+  .role-btn:hover { border-color: #1a73e8; box-shadow: 0 1px 6px rgba(26,115,232,0.2); }
+  .role-btn i { font-size: 32px; }
+  .role-btn span { font-size: 15px; font-family: 'Google Sans'; color: #202124; }
+  .add-report-form { background: #fff; border: 1px solid #dadce0; border-radius: 8px; padding: 24px; margin-bottom: 24px; }
 </style>
-</head>
-<body>
 
-<!-- ══ LANDING ══ -->
-<div id="landing" style="min-height:100vh;display:flex;align-items:stretch;position:relative;z-index:1">
-  <div class="land-left">
-    <div class="land-brand">
-      <div class="logo-mark">S&D</div>
-      <h1>Speech &amp;<br><em>Debate</em></h1>
-      <p>The official tournament ballot portal for judges and participants.</p>
-    </div>
-  </div>
-  <div class="land-right">
-    <h2>Tournament Portal</h2>
-    <p class="subtitle">Sign in to your designated portal below</p>
-    <button class="land-btn land-btn-primary" onclick="show('judge-login')">Sign in as Judge →</button>
-    <button class="land-btn land-btn-outline" onclick="show('p-login')">Sign in as Participant</button>
-  </div>
-</div>
+<canvas id="confetti-canvas"></canvas>
 
-<!-- ══ JUDGE LOGIN ══ -->
-<div id="judge-login" style="min-height:100vh;display:none;align-items:stretch;position:relative;z-index:1">
-  <div class="login-left">
-    <div class="login-brand">
-      <div class="logo-mark">S&D</div>
-      <h1>Judge<br><em>Portal</em></h1>
-      <p>Access your ballot dashboard to manage participants and record decisions.</p>
-    </div>
-  </div>
-  <div class="login-right">
-    <h2>Judge Sign In</h2>
-    <p class="subtitle">Use your assigned judge credentials</p>
-    <div class="error-msg" id="j-err">Invalid credentials. Please try again.</div>
-    <div class="form-group">
-      <label>Email Address</label>
-      <input type="email" id="j-email" placeholder="judge@example.com" autocomplete="username"/>
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="j-pass" placeholder="Enter your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doJudgeLogin()"/>
-    </div>
-    <button class="btn-primary" onclick="doJudgeLogin()">Sign In →</button>
-    <div class="back-link"><button onclick="show('landing')">← Back to home</button></div>
-  </div>
-</div>
+<div id="app">
 
-<!-- ══ PARTICIPANT LOGIN ══ -->
-<div id="p-login" style="min-height:100vh;display:none;align-items:stretch;position:relative;z-index:1">
-  <div class="login-left" style="background:linear-gradient(135deg,#1A1410 60%,#2E1A0E)">
-    <div class="login-brand">
-      <div class="logo-mark">S&D</div>
-      <h1>Participant<br><em>Portal</em></h1>
-      <p>Sign in with the credentials provided to you by your judge to view your ballot and status.</p>
+<!-- ===== LANDING: Choose Role ===== -->
+<div class="page active" id="page-landing">
+  <div class="login-bg">
+    <div class="login-logo">
+      <span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span>
+      <span style="font-weight:300; color:#5f6368; margin-left:6px; font-size:28px">Report</span>
     </div>
-  </div>
-  <div class="login-right">
-    <h2>Participant Sign In</h2>
-    <p class="subtitle">Use your assigned participant credentials</p>
-    <div class="error-msg" id="p-err">Invalid email or password. Please check your credentials.</div>
-    <div class="form-group">
-      <label>Email Address</label>
-      <input type="email" id="p-email" placeholder="your@email.com"/>
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="p-pass" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doParticipantLogin()"/>
-    </div>
-    <button class="btn-primary" onclick="doParticipantLogin()">Sign In →</button>
-    <div class="back-link"><button onclick="show('landing')">← Back to home</button></div>
-  </div>
-</div>
-
-<!-- ══ JUDGE PORTAL ══ -->
-<div id="portal" style="min-height:100vh;position:relative;z-index:1">
-  <div class="app-bar">
-    <div class="brand"><span>S&D</span> Ballot System</div>
-    <div class="nav-tabs">
-      <button class="nav-tab active" id="ntab-participants" onclick="switchTab('participants')">Participants &amp; Ballots</button>
-      <button class="nav-tab" id="ntab-placings" onclick="switchTab('placings')">Placings</button>
-    </div>
-    <div class="user-pill">
-      <div class="user-avatar-sm">VA</div>
-      <span class="user-name-sm">Varun</span>
-    </div>
-    <button class="logout-btn" onclick="show('landing')">Sign out</button>
-  </div>
-
-  <!-- PARTICIPANTS PAGE -->
-  <div class="page active" id="page-participants">
-    <div class="page-header" style="display:flex;align-items:flex-end;justify-content:space-between">
-      <div>
-        <h2>Participants &amp; Ballots</h2>
-        <p>Manage participant ballots and feedback</p>
+    <div class="login-subtitle">Choose your portal to continue</div>
+    <div class="role-btns">
+      <div class="role-btn" onclick="showLogin('leader')">
+        <i class="ti ti-shield-check" style="color:#1a73e8"></i>
+        <span>Leader</span>
       </div>
-      <button class="btn-add-part" onclick="openAdd()">+ Add Participant</button>
-    </div>
-    <div id="p-list">
-      <div class="empty-state"><div class="icon">📋</div><p>No participants yet. Add your first ballot above.</p></div>
-    </div>
-  </div>
-
-  <!-- PLACINGS PAGE -->
-  <div class="page" id="page-placings">
-    <div class="page-header">
-      <h2>Placings</h2>
-      <p>Manage finals selections and view overall rankings</p>
-    </div>
-    <div class="sub-tabs">
-      <button class="sub-tab active" id="stab-finals" onclick="switchSubTab('finals')">Finals</button>
-      <button class="sub-tab" id="stab-rankings" onclick="switchSubTab('rankings')">Overall Rankings</button>
-    </div>
-    <div class="sub-page active" id="sub-finals">
-      <div id="finals-list-wrap"></div>
-      <button class="btn-save-finals" onclick="saveFinalists()">Save All Changes</button>
-    </div>
-    <div class="sub-page" id="sub-rankings">
-      <div id="rankings-wrap"></div>
+      <div class="role-btn" onclick="showLogin('applicant')">
+        <i class="ti ti-user" style="color:#34a853"></i>
+        <span>Applicant</span>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ══ PARTICIPANT PORTAL ══ -->
-<div id="p-portal">
-  <div class="pp-bar">
-    <div class="pp-bar-brand"><span>S&D</span> Ballot System — Participant Portal</div>
-    <button class="logout-btn" onclick="show('landing')">Sign out</button>
-  </div>
-  <div style="max-width:680px;margin:80px auto;padding:0 32px;text-align:center">
-    <div id="pp-avatar" style="width:80px;height:80px;border-radius:50%;background:var(--accent-pale);color:var(--accent);font-family:'Playfair Display',serif;font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 24px"></div>
-    <h1 style="font-family:'Playfair Display',serif;font-size:42px;margin-bottom:12px">Welcome, <em id="pp-name" style="color:var(--accent);font-style:italic"></em>!</h1>
-    <p style="color:var(--ink-light);font-size:16px;font-weight:300;margin-bottom:48px;line-height:1.7">You have successfully signed into the Speech &amp; Debate Participant Portal. Click below to view your ballot and status update.</p>
-    <button onclick="showStatusPage()" style="padding:18px 48px;background:var(--ink);color:white;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s;letter-spacing:.02em">📬 View Status Update</button>
-  </div>
-</div>
-
-<!-- ══ STATUS LETTER PAGE ══ -->
-<div id="status-page">
-  <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
-  <div class="pp-bar">
-    <div class="pp-bar-brand"><span>S&D</span> Ballot System — Participant Portal</div>
-    <button class="logout-btn" onclick="show('p-portal')">← Back to Portal</button>
-  </div>
-  <div style="max-width:720px;margin:48px auto;padding:0 32px 80px">
-    <div id="letter-box" style="background:var(--warm-white);border:1.5px solid var(--border);border-radius:var(--radius);padding:60px 64px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden"></div>
-  </div>
-</div>
-
-<!-- ══ ADD PARTICIPANT MODAL ══ -->
-<div class="modal-overlay" id="add-modal" onclick="if(event.target===this)closeAdd()">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeAdd()">×</button>
-    <div class="modal-tag">New Ballot</div>
-    <div class="modal-title">Add Participant</div>
-    <div class="form-row-2">
-      <div class="form-group">
-        <label>Participant Name</label>
-        <input type="text" id="f-name" placeholder="Full name"/>
-      </div>
-      <div class="form-group">
-        <label>Participant Email</label>
-        <input type="email" id="f-email" placeholder="participant@example.com"/>
-      </div>
+<!-- ===== LOGIN: Leader ===== -->
+<div class="page" id="page-login-leader">
+  <div class="login-bg">
+    <div class="login-logo">
+      <span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span>
+      <span style="font-weight:300; color:#5f6368; margin-left:6px; font-size:28px">Report</span>
     </div>
-    <div class="form-row-2">
-      <div class="form-group">
-        <label>Participant Password</label>
-        <input type="password" id="f-pw" placeholder="Set login password"/>
+    <div class="login-box">
+      <h2>Sign in</h2>
+      <p>Leader Portal</p>
+      <input class="g-input" id="leader-email" type="email" placeholder="Email" autocomplete="off">
+      <input class="g-input" id="leader-pass" type="password" placeholder="Password">
+      <div class="error-msg" id="leader-error">Wrong email or password. Please try again.</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+        <span class="login-footer" style="margin:0"><a onclick="showPage('page-landing')">← Back</a></span>
+        <button class="g-btn" onclick="leaderLogin()">Next</button>
       </div>
-      <div class="form-group">
-        <label>Judge Name</label>
-        <input type="text" id="f-judge" value="Varun Athukrishnaswamy"/>
-      </div>
-    </div>
-    <div class="form-row-2">
-      <div class="form-group">
-        <label>Participant Rank</label>
-        <input type="text" id="f-rank" placeholder="e.g. 1st, 2nd, A"/>
-      </div>
-      <div class="form-group">
-        <label>Participant Rate (1–25)</label>
-        <select id="f-rate"><option value="">Select rating…</option></select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Speech Time</label>
-      <div class="sw-wrap">
-        <div class="sw-display" id="sw-time">00:00.0</div>
-        <div class="sw-btns">
-          <button class="sw-btn sw-start" id="sw-go" onclick="swStart()">▶ Start</button>
-          <button class="sw-btn sw-stop" id="sw-halt" onclick="swStop()" style="display:none">■ Stop</button>
-          <button class="sw-btn sw-reset" onclick="swReset()">↺ Reset</button>
-        </div>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Topic Name</label>
-      <input type="text" id="f-topic" placeholder="e.g. Resolved: AI should be regulated by governments."/>
-    </div>
-    <div class="form-group">
-      <label>Feedback</label>
-      <div class="rte-toolbar">
-        <button class="rte-btn" onclick="fmt('bold')"><b>B</b></button>
-        <button class="rte-btn" onclick="fmt('italic')"><i>I</i></button>
-        <button class="rte-btn" onclick="fmt('underline')"><u>U</u></button>
-        <button class="rte-btn" onclick="fmtHR()" title="Horizontal Line">—</button>
-        <button class="rte-btn" onclick="fmt('insertOrderedList')">1.</button>
-        <button class="rte-btn" onclick="fmt('insertUnorderedList')">•</button>
-        <button class="rte-btn" onclick="fmtCB()">☐</button>
-      </div>
-      <div class="rte-editor" id="f-feedback" contenteditable="true" aria-label="Feedback editor"></div>
-    </div>
-    <div class="modal-divider"></div>
-    <div class="modal-footer-btns">
-      <button class="btn-cancel-modal" onclick="closeAdd()">Cancel</button>
-      <button class="btn-save-modal" onclick="saveBallot()">Save Ballot →</button>
     </div>
   </div>
 </div>
 
-<!-- VIEW BALLOT MODAL -->
-<div class="modal-overlay" id="view-modal" onclick="if(event.target===this)closeView()">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeView()">×</button>
-    <div class="modal-tag">Ballot Record</div>
-    <div id="view-body"></div>
-    <div class="modal-divider"></div>
-    <button class="btn-save-modal" style="width:100%" onclick="closeView()">Close</button>
+<!-- ===== LOGIN: Applicant ===== -->
+<div class="page" id="page-login-applicant">
+  <div class="login-bg">
+    <div class="login-logo">
+      <span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span>
+      <span style="font-weight:300; color:#5f6368; margin-left:6px; font-size:28px">Report</span>
+    </div>
+    <div class="login-box">
+      <h2>Sign in</h2>
+      <p>Applicant Portal</p>
+      <input class="g-input" id="applicant-email" type="email" placeholder="Email" autocomplete="off">
+      <input class="g-input" id="applicant-pass" type="password" placeholder="Password">
+      <div class="error-msg" id="applicant-error">Wrong email or password. Please try again.</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+        <span class="login-footer" style="margin:0"><a onclick="showPage('page-landing')">← Back</a></span>
+        <button class="g-btn" onclick="applicantLogin()">Next</button>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- FINALISTS MODAL -->
-<div class="modal-overlay" id="finalists-modal" onclick="if(event.target===this)document.getElementById('finalists-modal').classList.remove('open')">
-  <div class="modal-box" style="width:480px">
-    <button class="modal-close" onclick="document.getElementById('finalists-modal').classList.remove('open')">×</button>
-    <div class="modal-tag" id="fm-tag">Finalists</div>
-    <div class="modal-title" id="fm-title">Who Made Finals</div>
-    <div id="fm-body"></div>
+<!-- ===== LEADER DASHBOARD ===== -->
+<div class="page" id="page-leader">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span>
+      <span style="font-weight:300; color:#5f6368; margin-left:4px; font-size:20px">Report</span>
+    </div>
+    <div class="topbar-right">
+      <button class="sign-out-btn" onclick="signOut()">Sign out</button>
+      <div class="avatar" title="Leader">L</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" id="tab-reports" onclick="leaderTab('reports')">Reports</div>
+    <div class="tab" id="tab-applicants" onclick="leaderTab('applicants')">Applicants</div>
+  </div>
+
+  <!-- Reports Tab -->
+  <div class="content" id="leader-reports-tab">
+    <div class="section-header">
+      <div class="section-title">Reports</div>
+      <button class="g-btn" onclick="showAddReport()">+ New report</button>
+    </div>
+    <div class="add-report-form" id="add-report-form" style="display:none;">
+      <div style="font-size:16px; font-family:'Google Sans'; margin-bottom:16px; color:#202124;">Create report</div>
+      <input class="g-input" id="new-report-name" placeholder="Report title" style="margin-bottom:12px;">
+      <div class="editor-toolbar" id="editor-toolbar">
+        <button class="tool-btn" onclick="execCmd('bold')" title="Bold"><b>B</b></button>
+        <button class="tool-btn" onclick="execCmd('italic')" title="Italic"><i>I</i></button>
+        <button class="tool-btn" onclick="execCmd('underline')" title="Underline"><u>U</u></button>
+        <div class="tool-sep"></div>
+        <button class="tool-btn" title="Ordered list" onclick="execCmd('insertOrderedList')">1.</button>
+        <button class="tool-btn" title="Bullet list" onclick="execCmd('insertUnorderedList')">•</button>
+        <button class="tool-btn" title="Checkbox" onclick="insertCheckbox()">☑</button>
+        <div class="tool-sep"></div>
+        <button class="tool-btn" title="Horizontal rule" onclick="execCmd('insertHorizontalRule')">—</button>
+        <button class="tool-btn" title="Number format" onclick="formatNumber()"><span style="font-size:12px">123</span></button>
+      </div>
+      <div class="editor-area" id="report-editor" contenteditable="true" spellcheck="true" style="border-radius:0 0 4px 4px;"></div>
+      <div class="score-row">
+        <span class="score-label">Score:</span>
+        <input class="score-input" id="score-num" type="number" placeholder="0" min="0">
+        <span class="score-slash">/</span>
+        <input class="score-input" id="score-den" type="number" placeholder="100" min="1">
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:16px;">
+        <button class="g-btn-outline" onclick="hideAddReport()">Cancel</button>
+        <button class="g-btn" onclick="saveReport()">Save report</button>
+      </div>
+    </div>
+    <div id="reports-list"></div>
+  </div>
+
+  <!-- Applicants Tab -->
+  <div class="content" id="leader-applicants-tab" style="display:none;">
+    <div class="section-header">
+      <div class="section-title">Applicants</div>
+      <button class="g-btn" onclick="openAddApplicantModal()">+ Add applicant</button>
+    </div>
+    <div id="applicants-list"></div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- ===== APPLICANT PORTAL ===== -->
+<div class="page" id="page-applicant">
+  <div class="topbar" style="position:relative;">
+    <div class="topbar-logo">
+      <span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span>
+      <span style="font-weight:300; color:#5f6368; margin-left:4px; font-size:20px">Report</span>
+    </div>
+    <div class="topbar-right">
+      <button class="notif-btn" onclick="toggleNotif()" id="notif-btn" aria-label="Notifications">
+        <i class="ti ti-bell" style="font-size:22px; color:#5f6368;"></i>
+        <span class="notif-dot" id="notif-dot"></span>
+      </button>
+      <button class="sign-out-btn" onclick="signOut()">Sign out</button>
+      <div class="avatar" id="applicant-avatar" style="background:#34a853;">A</div>
+    </div>
+    <div class="notif-panel" id="notif-panel">
+      <div class="notif-header"><i class="ti ti-bell" style="font-size:16px; vertical-align:-2px; margin-right:6px;"></i>Notifications</div>
+      <div id="notif-items"></div>
+    </div>
+  </div>
+  <div class="content">
+    <div id="applicant-home">
+      <div style="padding: 40px 0 0; text-align:center;">
+        <i class="ti ti-circle-check" style="font-size:48px; color:#34a853; display:block; margin-bottom:12px;"></i>
+        <div style="font-size:22px; font-family:'Google Sans'; color:#202124; margin-bottom:8px;">Welcome to your portal</div>
+        <div style="color:#5f6368; font-size:15px;">Click the bell icon above to view your notifications and scores.</div>
+      </div>
+    </div>
+    <div id="applicant-score-view" style="display:none;"></div>
+    <div id="applicant-report-view" style="display:none;"></div>
+  </div>
+</div>
 
+<!-- Add Applicant Modal -->
+<div class="modal-backdrop" id="modal-add-applicant">
+  <div class="modal">
+    <h3>Add applicant</h3>
+    <label>Full name</label>
+    <input class="g-input" id="new-applicant-name" placeholder="Jane Doe" style="margin-top:4px;">
+    <label>Email</label>
+    <input class="g-input" id="new-applicant-email" type="email" placeholder="jane@example.com" style="margin-top:4px;">
+    <label>Password</label>
+    <input class="g-input" id="new-applicant-pass" type="password" placeholder="Set a password" style="margin-top:4px;">
+    <div class="modal-actions">
+      <button class="g-btn-outline" onclick="closeModal('modal-add-applicant')">Cancel</button>
+      <button class="g-btn" onclick="saveApplicant()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Score/Report Modal -->
+<div class="modal-backdrop" id="modal-score">
+  <div class="modal">
+    <h3 id="score-modal-title">Score</h3>
+    <div class="score-display">
+      <div class="score-pct" id="score-modal-pct"></div>
+      <div style="font-size:14px; color:#5f6368; margin-top:8px;" id="score-modal-raw"></div>
+    </div>
+    <div style="text-align:center;">
+      <button class="g-btn" onclick="showApplicantReport()">View Report</button>
+    </div>
+    <div style="text-align:right; margin-top:16px;">
+      <button class="g-btn-outline" onclick="closeModal('modal-score')">Close</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.2/confetti.browser.min.js"></script>
 <script>
-// ─── STATE ────────────────────────────────────────────────────────────────────
-let participants = JSON.parse(localStorage.getItem('sdb_v2')||'[]');
-let finalists = JSON.parse(localStorage.getItem('sdb_finals')||'[]'); // array of IDs
-let currentParticipant = null;
+var state = {
+  reports: [],
+  applicants: [],
+  currentApplicant: null,
+  notifOpen: false
+};
 
-function persist(){
-  localStorage.setItem('sdb_v2',JSON.stringify(participants));
-  localStorage.setItem('sdb_finals',JSON.stringify(finalists));
+var LEADER = { email: 'vathukrishnaswamy@gmail.com', pass: 'gray10Five' };
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
 }
 
-// ─── RATE OPTIONS ─────────────────────────────────────────────────────────────
-(()=>{const s=document.getElementById('f-rate');for(let i=1;i<=25;i++){const o=document.createElement('option');o.value=i;o.textContent=i;s.appendChild(o)}})();
-
-// ─── SCREEN MANAGEMENT ───────────────────────────────────────────────────────
-function show(id){
-  ['landing','judge-login','p-login','portal','p-portal','status-page'].forEach(s=>{
-    const el=document.getElementById(s);
-    if(el){el.style.display='none'}
-  });
-  const target=document.getElementById(id);
-  if(target) target.style.display=(id==='portal'||id==='p-portal'||id==='status-page')?'block':'flex';
+function showLogin(role) {
+  showPage('page-login-' + role);
 }
 
-// ─── AUTH ─────────────────────────────────────────────────────────────────────
-function doJudgeLogin(){
-  const e=document.getElementById('j-email').value.trim();
-  const p=document.getElementById('j-pass').value;
-  const err=document.getElementById('j-err');
-  if(e==='vathukrishnaswamy@gmail.com'&&p==='gray10Five'){
-    err.classList.remove('show');
-    refreshPortal();
-    show('portal');
+function leaderLogin() {
+  var email = document.getElementById('leader-email').value.trim();
+  var pass = document.getElementById('leader-pass').value;
+  var err = document.getElementById('leader-error');
+  if (email === LEADER.email && pass === LEADER.pass) {
+    err.style.display = 'none';
+    showPage('page-leader');
+    renderReports();
+    renderApplicants();
   } else {
-    err.classList.add('show');
+    err.style.display = 'block';
   }
 }
 
-function doParticipantLogin(){
-  const e=document.getElementById('p-email').value.trim().toLowerCase();
-  const p=document.getElementById('p-pass').value;
-  const err=document.getElementById('p-err');
-  const found=participants.find(x=>x.email.toLowerCase()===e&&x.pw===p);
-  if(found){
-    err.classList.remove('show');
-    currentParticipant=found;
-    loadParticipantPortal(found);
-    show('p-portal');
+function applicantLogin() {
+  var email = document.getElementById('applicant-email').value.trim();
+  var pass = document.getElementById('applicant-pass').value;
+  var err = document.getElementById('applicant-error');
+  var found = state.applicants.find(function(a){ return a.email === email && a.pass === pass; });
+  if (found) {
+    err.style.display = 'none';
+    state.currentApplicant = found;
+    var av = document.getElementById('applicant-avatar');
+    av.textContent = found.name.charAt(0).toUpperCase();
+    showPage('page-applicant');
+    renderNotifications();
+    document.getElementById('applicant-score-view').style.display = 'none';
+    document.getElementById('applicant-report-view').style.display = 'none';
+    document.getElementById('applicant-home').style.display = 'block';
   } else {
-    err.classList.add('show');
+    err.style.display = 'block';
   }
 }
 
-// ─── PORTAL TABS ─────────────────────────────────────────────────────────────
-function switchTab(t){
-  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('ntab-'+t).classList.add('active');
-  document.getElementById('page-'+t).classList.add('active');
-  if(t==='placings'){renderFinalsTab();renderRankings()}
-}
-function switchSubTab(t){
-  document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.sub-page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('stab-'+t).classList.add('active');
-  document.getElementById('sub-'+t).classList.add('active');
+function signOut() {
+  state.currentApplicant = null;
+  state.notifOpen = false;
+  document.getElementById('notif-panel').classList.remove('open');
+  document.getElementById('leader-email').value = '';
+  document.getElementById('leader-pass').value = '';
+  document.getElementById('applicant-email').value = '';
+  document.getElementById('applicant-pass').value = '';
+  showPage('page-landing');
 }
 
-// ─── REFRESH ──────────────────────────────────────────────────────────────────
-function refreshPortal(){renderParticipants();renderFinalsTab();renderRankings()}
+function leaderTab(tab) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('leader-reports-tab').style.display = tab === 'reports' ? 'block' : 'none';
+  document.getElementById('leader-applicants-tab').style.display = tab === 'applicants' ? 'block' : 'none';
+}
 
-// ─── PARTICIPANT CARDS ────────────────────────────────────────────────────────
-function initials(name){if(!name)return'?';return name.trim().split(/\s+/).map(n=>n[0]).join('').toUpperCase().slice(0,2)}
-function esc(s){const d=document.createElement('div');d.appendChild(document.createTextNode(String(s||'')));return d.innerHTML}
+function showAddReport() {
+  document.getElementById('add-report-form').style.display = 'block';
+  document.getElementById('new-report-name').value = '';
+  document.getElementById('report-editor').innerHTML = '';
+  document.getElementById('score-num').value = '';
+  document.getElementById('score-den').value = '';
+}
 
-function renderParticipants(){
-  const wrap=document.getElementById('p-list');
-  if(!participants.length){
-    wrap.innerHTML='<div class="empty-state"><div class="icon">📋</div><p>No participants yet. Add your first ballot above.</p></div>';
+function hideAddReport() {
+  document.getElementById('add-report-form').style.display = 'none';
+}
+
+function execCmd(cmd) {
+  document.getElementById('report-editor').focus();
+  document.execCommand(cmd, false, null);
+}
+
+function insertCheckbox() {
+  document.getElementById('report-editor').focus();
+  document.execCommand('insertHTML', false, '<input type="checkbox" style="margin-right:6px;"> ');
+}
+
+function formatNumber() {
+  var sel = window.getSelection();
+  if (sel && sel.toString()) {
+    var n = parseFloat(sel.toString());
+    if (!isNaN(n)) document.execCommand('insertText', false, n.toLocaleString());
+  }
+}
+
+function saveReport() {
+  var name = document.getElementById('new-report-name').value.trim();
+  var content = document.getElementById('report-editor').innerHTML;
+  var num = parseInt(document.getElementById('score-num').value) || 0;
+  var den = parseInt(document.getElementById('score-den').value) || 100;
+  if (!name) { alert('Please enter a report title.'); return; }
+  var report = { id: Date.now(), name: name, content: content, scoreNum: num, scoreDen: den };
+  state.reports.push(report);
+  hideAddReport();
+  renderReports();
+}
+
+function renderReports() {
+  var el = document.getElementById('reports-list');
+  if (!state.reports.length) {
+    el.innerHTML = '<div class="empty-state"><i class="ti ti-file-description"></i>No reports yet. Create your first one.</div>';
     return;
   }
-  wrap.innerHTML=participants.map(p=>`
-    <div class="applicant-card" style="margin-bottom:12px">
-      <div class="ap-avatar">${initials(p.name)}</div>
-      <div class="ap-info">
-        <div class="ap-name">${esc(p.name||'Unnamed')}</div>
-        <div class="ap-notes">${esc(p.email||'')} · Rank: ${esc(p.rank||'—')} · Rate: ${p.rate||'—'}/25 · ${esc(p.topic||'No topic')}</div>
-      </div>
-      <div class="ap-btns">
-        <button class="ap-btn" onclick="viewBallot('${p.id}')" title="View ballot">👁️</button>
-      </div>
-    </div>`).join('');
-}
-
-// ─── ADD / SAVE ───────────────────────────────────────────────────────────────
-function openAdd(){
-  swReset();
-  ['f-name','f-email','f-pw','f-rank','f-topic'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-judge').value='Varun Athukrishnaswamy';
-  document.getElementById('f-rate').value='';
-  document.getElementById('f-feedback').innerHTML='';
-  document.getElementById('add-modal').classList.add('open');
-}
-function closeAdd(){document.getElementById('add-modal').classList.remove('open')}
-
-function saveBallot(){
-  const email=document.getElementById('f-email').value.trim();
-  const pw=document.getElementById('f-pw').value;
-  if(!email){alert('Please enter a participant email.');return}
-  if(!pw){alert('Please set a participant password.');return}
-  participants.push({
-    id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),
-    name:document.getElementById('f-name').value.trim(),
-    email,pw,
-    judge:document.getElementById('f-judge').value.trim(),
-    rank:document.getElementById('f-rank').value.trim(),
-    rate:document.getElementById('f-rate').value,
-    time:document.getElementById('sw-time').textContent,
-    topic:document.getElementById('f-topic').value.trim(),
-    feedback:document.getElementById('f-feedback').innerHTML
-  });
-  persist();
-  closeAdd();
-  refreshPortal();
-  toast('Ballot saved successfully!');
-}
-
-// ─── VIEW BALLOT ──────────────────────────────────────────────────────────────
-function viewBallot(id){
-  const p=participants.find(x=>x.id===id);if(!p)return;
-  const rn=+p.rate||0;
-  const dots=Array.from({length:25},(_,i)=>`<div class="rate-dot${i<rn?' on':''}"></div>`).join('');
-  document.getElementById('view-body').innerHTML=`
-    <div class="modal-title" style="margin-bottom:8px">${esc(p.name||'Unnamed')}</div>
-    <div style="font-size:13px;color:var(--ink-light);margin-bottom:20px">${esc(p.email||'')}</div>
-    <div class="modal-row"><div class="modal-icon">👨‍⚖️</div><div><div class="modal-lbl">Judge</div><div class="modal-val">${esc(p.judge||'—')}</div></div></div>
-    <div class="modal-row"><div class="modal-icon">📌</div><div><div class="modal-lbl">Topic</div><div class="modal-val">${esc(p.topic||'—')}</div></div></div>
-    <div class="modal-row"><div class="modal-icon">🏅</div><div><div class="modal-lbl">Rank / Rate</div><div class="modal-val">${esc(p.rank||'—')} &nbsp;·&nbsp; <span style="display:inline-flex;gap:2px;vertical-align:middle">${dots}</span> ${rn}/25</div></div></div>
-    <div class="modal-row"><div class="modal-icon">⏱️</div><div><div class="modal-lbl">Speech Time</div><div class="modal-val">${esc(p.time||'—')}</div></div></div>
-    ${p.feedback?`<div class="modal-divider"></div><div class="modal-lbl" style="margin-bottom:10px">Feedback</div><div style="background:var(--cream);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;font-size:14px;line-height:1.7;max-height:200px;overflow-y:auto">${p.feedback}</div>`:''}`;
-  document.getElementById('view-modal').classList.add('open');
-}
-function closeView(){document.getElementById('view-modal').classList.remove('open')}
-
-// ─── FINALS TAB ───────────────────────────────────────────────────────────────
-function renderFinalsTab(){
-  const wrap=document.getElementById('finals-list-wrap');
-  if(!participants.length){
-    wrap.innerHTML='<div class="empty-state"><div class="icon">🏆</div><p>No participants added yet. Add participants in the Participants & Ballots tab.</p></div>';
-    return;
-  }
-  wrap.innerHTML=`<p style="font-size:14px;color:var(--ink-light);font-weight:300;margin-bottom:20px">Check participants to advance them to finals, then click Save All Changes.</p>`+
-  participants.map(p=>{
-    const checked=finalists.includes(p.id);
-    return `<div class="finals-item">
-      <div class="finals-cb${checked?' checked':''}" id="fcb-${p.id}" onclick="toggleFinalist('${p.id}')">
-        <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><polyline points="1,5 4.5,8.5 11,1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div style="flex:1">
-        <div class="finals-name">${esc(p.name||'Unnamed')}</div>
-        <div class="finals-meta">${esc(p.email||'')} · Rate: ${p.rate||'—'}/25 · ${esc(p.topic||'No topic')}</div>
-      </div>
-      ${checked?'<span style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--sage);background:var(--sage-pale);padding:4px 10px;border-radius:20px">Finalist</span>':''}
-    </div>`;
+  el.innerHTML = state.reports.map(function(r){
+    var pct = r.scoreDen > 0 ? Math.round((r.scoreNum / r.scoreDen) * 100) : 0;
+    return '<div class="report-card"><div class="report-card-title">'+escHtml(r.name)+'</div><div class="report-meta"><span class="score-badge">'+r.scoreNum+' / '+r.scoreDen+' &nbsp;('+pct+'%)</span></div></div>';
   }).join('');
 }
 
-function toggleFinalist(id){
-  const cb=document.getElementById('fcb-'+id);
-  if(finalists.includes(id)){
-    finalists=finalists.filter(x=>x!==id);
-    cb.classList.remove('checked');
-    // remove badge
-    const item=cb.closest('.finals-item');
-    const badge=item.querySelector('span');
-    if(badge)badge.remove();
-  } else {
-    finalists.push(id);
-    cb.classList.add('checked');
-    const item=cb.closest('.finals-item');
-    if(!item.querySelector('span')){
-      const badge=document.createElement('span');
-      badge.style.cssText='font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--sage);background:var(--sage-pale);padding:4px 10px;border-radius:20px';
-      badge.textContent='Finalist';
-      item.appendChild(badge);
-    }
+function openAddApplicantModal() {
+  document.getElementById('new-applicant-name').value = '';
+  document.getElementById('new-applicant-email').value = '';
+  document.getElementById('new-applicant-pass').value = '';
+  document.getElementById('modal-add-applicant').classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function saveApplicant() {
+  var name = document.getElementById('new-applicant-name').value.trim();
+  var email = document.getElementById('new-applicant-email').value.trim();
+  var pass = document.getElementById('new-applicant-pass').value;
+  if (!name || !email || !pass) { alert('Please fill all fields.'); return; }
+  var applicant = { id: Date.now(), name: name, email: email, pass: pass, assignedReports: [] };
+  state.applicants.push(applicant);
+  closeModal('modal-add-applicant');
+  renderApplicants();
+}
+
+function renderApplicants() {
+  var el = document.getElementById('applicants-list');
+  if (!state.applicants.length) {
+    el.innerHTML = '<div class="empty-state"><i class="ti ti-users"></i>No applicants yet. Add one to get started.</div>';
+    return;
+  }
+  el.innerHTML = state.applicants.map(function(a, ai){
+    var reportOpts = state.reports.map(function(r){
+      return '<option value="'+r.id+'">'+escHtml(r.name)+'</option>';
+    }).join('');
+    var chips = a.assignedReports.map(function(rid){
+      var r = state.reports.find(function(x){ return x.id === rid; });
+      if (!r) return '';
+      return '<span class="chip">'+escHtml(r.name)+'<span class="chip-remove" onclick="removeReport('+ai+','+rid+')">×</span></span>';
+    }).join('');
+    return '<div class="applicant-card">'
+      +'<div class="applicant-name">'+escHtml(a.name)+'</div>'
+      +'<div class="applicant-email">'+escHtml(a.email)+'</div>'
+      +'<div class="report-assign" style="margin-bottom:10px;">'+(chips || '<span style="font-size:13px;color:#9aa0a6;">No reports assigned</span>')+'</div>'
+      +'<div style="display:flex;gap:8px;align-items:center;">'
+      +(state.reports.length ? '<select class="g-select" id="report-sel-'+ai+'"><option value="">Select a report...</option>'+reportOpts+'</select>'
+        +'<button class="g-btn" onclick="assignReport('+ai+')" style="padding:8px 16px;font-size:13px;">Add report</button>'
+        : '<span style="font-size:13px;color:#9aa0a6;">Create reports first</span>')
+      +'</div></div>';
+  }).join('');
+}
+
+function assignReport(ai) {
+  var sel = document.getElementById('report-sel-' + ai);
+  var rid = parseInt(sel.value);
+  if (!rid) return;
+  if (!state.applicants[ai].assignedReports.includes(rid)) {
+    state.applicants[ai].assignedReports.push(rid);
+    renderApplicants();
   }
 }
 
-function saveFinalists(){
-  persist();
-  toast('Finals selections saved!');
+function removeReport(ai, rid) {
+  state.applicants[ai].assignedReports = state.applicants[ai].assignedReports.filter(function(r){ return r !== rid; });
+  renderApplicants();
 }
 
-// ─── RANKINGS ─────────────────────────────────────────────────────────────────
-function renderRankings(){
-  const wrap=document.getElementById('rankings-wrap');
-  if(!participants.length){wrap.innerHTML='<p style="color:var(--ink-light);font-size:14px">No participants yet.</p>';return}
-  const sorted=[...participants].sort((a,b)=>(+b.rate||0)-(+a.rate||0));
-  wrap.innerHTML=`<table class="rankings-table">
-    <thead><tr>
-      <th style="width:60px;text-align:center">Place</th>
-      <th>Participant</th><th>Topic</th><th>Rating</th><th>Time</th><th>Judge</th>
-    </tr></thead>
-    <tbody>${sorted.map((p,i)=>{
-      const cls=i===0?'place-1':i===1?'place-2':i===2?'place-3':'place-n';
-      const lbl=i===0?'1st':i===1?'2nd':i===2?'3rd':`${i+1}`;
-      const rn=+p.rate||0;
-      const dots=Array.from({length:25},(_,j)=>`<div class="rate-dot${j<rn?' on':''}"></div>`).join('');
-      return `<tr>
-        <td style="text-align:center"><div class="place-badge ${cls}" style="margin:0 auto">${lbl}</div></td>
-        <td><div style="font-weight:600;font-size:14px">${esc(p.name||'Unnamed')}</div><div style="font-size:12px;color:var(--ink-light)">${esc(p.email||'')}</div></td>
-        <td style="font-size:13px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.topic||'—')}</td>
-        <td><div class="rate-dots">${dots}</div><div style="font-size:11px;color:var(--ink-light);margin-top:4px">${rn}/25</div></td>
-        <td style="font-size:13px">${esc(p.time||'—')}</td>
-        <td style="font-size:13px">${esc(p.judge||'—')}</td>
-      </tr>`;
-    }).join('')}</tbody></table>`;
+function toggleNotif() {
+  var panel = document.getElementById('notif-panel');
+  state.notifOpen = !state.notifOpen;
+  if (state.notifOpen) panel.classList.add('open'); else panel.classList.remove('open');
 }
 
-// ─── PARTICIPANT PORTAL ───────────────────────────────────────────────────────
-function loadParticipantPortal(p){
-  document.getElementById('pp-avatar').textContent=initials(p.name);
-  document.getElementById('pp-name').textContent=(p.name||'').split(' ')[0]||'Participant';
+function renderNotifications() {
+  var a = state.currentApplicant;
+  if (!a) return;
+  var items = document.getElementById('notif-items');
+  var dot = document.getElementById('notif-dot');
+  if (!a.assignedReports || !a.assignedReports.length) {
+    dot.style.display = 'none';
+    items.innerHTML = '<div style="padding:16px 20px; font-size:14px; color:#9aa0a6;">No notifications yet.</div>';
+    return;
+  }
+  dot.style.display = 'block';
+  items.innerHTML = a.assignedReports.map(function(rid){
+    var r = state.reports.find(function(x){ return x.id === rid; });
+    if (!r) return '';
+    return '<div class="notif-item" onclick="viewScore('+rid+')">'
+      +'<div class="notif-item-title"><i class="ti ti-file-certificate" style="font-size:14px;vertical-align:-1px;margin-right:4px;color:#1a73e8;"></i>'+escHtml(r.name)+'</div>'
+      +'<div class="notif-item-sub">Tap to view your score</div>'
+      +'</div>';
+  }).join('');
 }
 
-function showStatusPage(){
-  const p=currentParticipant;if(!p)return;
-  const isFinalist=finalists.includes(p.id);
-  const box=document.getElementById('letter-box');
-  if(isFinalist){
-    box.innerHTML=buildAcceptanceLetter(p);
-    show('status-page');
-    setTimeout(()=>runConfetti(),400);
-  } else {
-    box.innerHTML=buildRejectionLetter(p);
-    show('status-page');
+var currentReportId = null;
+function viewScore(rid) {
+  currentReportId = rid;
+  var r = state.reports.find(function(x){ return x.id === rid; });
+  if (!r) return;
+  document.getElementById('notif-panel').classList.remove('open');
+  state.notifOpen = false;
+  var pct = r.scoreDen > 0 ? Math.round((r.scoreNum / r.scoreDen) * 100) : 0;
+  var el = document.getElementById('score-modal-pct');
+  el.textContent = pct + '%';
+  el.className = 'score-pct ' + (pct >= 75 ? 'pass' : 'fail');
+  document.getElementById('score-modal-raw').textContent = r.scoreNum + ' / ' + r.scoreDen;
+  document.getElementById('score-modal-title').textContent = r.name;
+  document.getElementById('modal-score').classList.add('open');
+  if (pct >= 75) {
+    launchConfetti();
   }
 }
 
-function buildAcceptanceLetter(p){
-  const firstName=(p.name||'Participant').split(' ')[0];
-  return `
-    <div style="position:absolute;top:0;left:0;right:0;height:6px;background:var(--sage)"></div>
-    <div style="text-align:center;margin-bottom:48px">
-      <div style="font-family:'Playfair Display',serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);margin-bottom:8px">Speech &amp; Debate Tournament</div>
-      <div style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--ink);margin-bottom:8px">Congratulations!</div>
-      <div style="width:60px;height:2px;background:var(--sage);margin:0 auto"></div>
-    </div>
-    <p style="font-size:15px;color:var(--ink-muted);margin-bottom:8px;font-weight:300">Dear <strong style="color:var(--ink)">${esc(p.name||'Participant')}</strong>,</p>
-    <p style="font-size:16px;line-height:1.9;color:var(--ink-muted);margin-bottom:24px;font-weight:300">It is with great pleasure that we inform you of your selection as a <strong style="color:var(--sage);font-weight:600">finalist</strong> in this tournament. Your performance was outstanding, and your dedication to the craft of speech and debate has been recognized by your judges.</p>
-    <p style="font-size:16px;line-height:1.9;color:var(--ink-muted);margin-bottom:32px;font-weight:300">You have earned your place among the best competitors in this tournament. We look forward to seeing you excel in finals. Please report to the finals room as directed by tournament staff.</p>
-    <div style="background:var(--sage-pale);border:1.5px solid rgba(123,158,135,.3);border-radius:var(--radius-sm);padding:20px 24px;margin-bottom:32px">
-      <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--sage);margin-bottom:12px">Your Ballot Summary</div>
-      <div style="display:flex;gap:24px;flex-wrap:wrap">
-        <div><div style="font-size:11px;color:var(--ink-light);margin-bottom:2px">Judge</div><div style="font-size:14px;font-weight:600">${esc(p.judge||'—')}</div></div>
-        <div><div style="font-size:11px;color:var(--ink-light);margin-bottom:2px">Rating</div><div style="font-size:14px;font-weight:600">${p.rate||'—'}/25</div></div>
-        <div><div style="font-size:11px;color:var(--ink-light);margin-bottom:2px">Rank</div><div style="font-size:14px;font-weight:600">${esc(p.rank||'—')}</div></div>
-        <div><div style="font-size:11px;color:var(--ink-light);margin-bottom:2px">Speech Time</div><div style="font-size:14px;font-weight:600">${esc(p.time||'—')}</div></div>
-      </div>
-    </div>
-    <p style="font-size:15px;line-height:1.8;color:var(--ink-muted);margin-bottom:40px;font-weight:300">Congratulations once again, ${esc(firstName)}. This is a well-deserved honor.</p>
-    <p style="font-size:14px;color:var(--ink-muted);font-weight:300">With best wishes,<br><strong style="color:var(--ink)">${esc(p.judge||'The Tournament Panel')}</strong><br><span style="font-size:13px;font-style:italic">Judge, Speech &amp; Debate Tournament</span></p>
-    <div style="margin-top:40px;padding-top:28px;border-top:1px solid var(--border);display:flex;justify-content:center">
-      <button onclick="showFinalistsList(true)" style="padding:13px 28px;background:var(--sage);color:white;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#6a8e76'" onmouseout="this.style.background='var(--sage)'">🏆 View Other Finalists</button>
-    </div>`;
+function showApplicantReport() {
+  var r = state.reports.find(function(x){ return x.id === currentReportId; });
+  if (!r) return;
+  closeModal('modal-score');
+  document.getElementById('applicant-home').style.display = 'none';
+  document.getElementById('applicant-score-view').style.display = 'none';
+  var rv = document.getElementById('applicant-report-view');
+  rv.style.display = 'block';
+  rv.innerHTML = '<button class="g-btn-outline" onclick="backToHome()" style="margin-bottom:20px;">← Back</button>'
+    + '<div class="report-name-big">'+escHtml(r.name)+'</div>'
+    + '<div class="report-view">'+r.content+'</div>';
 }
 
-function buildRejectionLetter(p){
-  const firstName=(p.name||'Participant').split(' ')[0];
-  return `
-    <div style="position:absolute;top:0;left:0;right:0;height:6px;background:var(--accent)"></div>
-    <div style="text-align:center;margin-bottom:48px">
-      <div style="font-family:'Playfair Display',serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:8px">Speech &amp; Debate Tournament</div>
-      <div style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--ink);margin-bottom:8px">Tournament Update</div>
-      <div style="width:60px;height:2px;background:var(--accent);margin:0 auto"></div>
-    </div>
-    <p style="font-size:15px;color:var(--ink-muted);margin-bottom:8px;font-weight:300">Dear <strong style="color:var(--ink)">${esc(p.name||'Participant')}</strong>,</p>
-    <p style="font-size:16px;line-height:1.9;color:var(--ink-muted);margin-bottom:24px;font-weight:300">Thank you sincerely for your participation in this tournament. We truly appreciate the effort, preparation, and commitment you brought to your performance.</p>
-    <p style="font-size:16px;line-height:1.9;color:var(--ink-muted);margin-bottom:24px;font-weight:300">After careful deliberation by your judge, we regret to inform you that you have not advanced to the finals round of this tournament. This decision was not made lightly — the competition was exceptional, and your performance reflected strong skill and preparation.</p>
-    <div style="background:var(--accent-pale);border:1.5px solid rgba(196,112,58,.2);border-radius:var(--radius-sm);padding:20px 24px;margin-bottom:32px">
-      <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:12px">Your Ballot Summary</div>
-      <div style="display:flex;gap:24px;flex-wrap:wrap">
-        <div><div style="font-size:11px;color:var(--ink-light);margin-bottom:2px">Judge</div><div style="font-size:14px;font-weight:600">${esc(p.judge||'—')}</div></div>
-        <div><div style="font-size:11px;color:var(--ink-light);margin-bottom:2px">Rating</div><div style="font-size:14px;font-weight:600">${p.rate||'—'}/25</div></div>
-        <div><div style="font-size:11px;color:var(--ink-light);margin-bottom:2px">Rank</div><div style="font-size:14px;font-weight:600">${esc(p.rank||'—')}</div></div>
-        <div><div style="font-size:11px;color:var(--ink-light);margin-bottom:2px">Speech Time</div><div style="font-size:14px;font-weight:600">${esc(p.time||'—')}</div></div>
-      </div>
-    </div>
-    <p style="font-size:16px;line-height:1.9;color:var(--ink-muted);margin-bottom:40px;font-weight:300">We encourage you to use this experience to grow. Every great competitor faces setbacks — it is how you respond that defines your trajectory. We hope to see you compete again.</p>
-    <p style="font-size:14px;color:var(--ink-muted);font-weight:300;margin-bottom:32px">With respect and encouragement,<br><strong style="color:var(--ink)">${esc(p.judge||'The Tournament Panel')}</strong><br><span style="font-size:13px;font-style:italic">Judge, Speech &amp; Debate Tournament</span></p>
-    <div style="padding-top:28px;border-top:1px solid var(--border);display:flex;justify-content:center">
-      <button onclick="showFinalistsList(false)" style="padding:13px 28px;background:var(--ink);color:white;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#2E251E'" onmouseout="this.style.background='var(--ink)'">View Who Made Finals</button>
-    </div>`;
+function backToHome() {
+  document.getElementById('applicant-home').style.display = 'block';
+  document.getElementById('applicant-report-view').style.display = 'none';
+  document.getElementById('applicant-score-view').style.display = 'none';
 }
 
-function showFinalistsList(isAccepted){
-  const finalistData=participants.filter(p=>finalists.includes(p.id));
-  const modal=document.getElementById('finalists-modal');
-  document.getElementById('fm-tag').textContent=isAccepted?'Finals Round':'Finals Roster';
-  document.getElementById('fm-title').textContent=isAccepted?'Your Fellow Finalists':'Who Made Finals';
-  if(!finalistData.length){
-    document.getElementById('fm-body').innerHTML='<p style="color:var(--ink-light);font-size:14px;padding:20px 0">No finalists have been announced yet.</p>';
-  } else {
-    document.getElementById('fm-body').innerHTML=`<p style="font-size:13px;color:var(--ink-light);margin-bottom:20px;font-weight:300">${finalistData.length} participant${finalistData.length!==1?'s':''} ${finalistData.length!==1?'have':'has'} advanced to finals.</p>`+
-    finalistData.map(p=>`<div class="finalist-row">
-      <div class="finalist-avatar">${initials(p.name)}</div>
-      <div style="flex:1">
-        <div style="font-size:15px;font-weight:600;color:var(--ink)">${esc(p.name||'Unnamed')}</div>
-        <div style="font-size:12px;color:var(--ink-light)">${esc(p.topic||'No topic')}</div>
-      </div>
-      <div style="font-size:12px;font-weight:600;color:var(--sage)">${p.rate||'—'}/25</div>
-    </div>`).join('');
+function launchConfetti() {
+  if (typeof confetti === 'undefined') return;
+  var end = Date.now() + 2200;
+  var colors = ['#4285F4','#EA4335','#FBBC05','#34A853'];
+  (function frame(){
+    confetti({ particleCount: 5, angle: 60, spread: 55, origin: {x:0}, colors: colors });
+    confetti({ particleCount: 5, angle: 120, spread: 55, origin: {x:1}, colors: colors });
+    if (Date.now() < end) requestAnimationFrame(frame);
+  })();
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Enter') {
+    var ap = document.getElementById('page-login-applicant');
+    var lp = document.getElementById('page-login-leader');
+    if (ap.classList.contains('active')) applicantLogin();
+    if (lp.classList.contains('active')) leaderLogin();
   }
-  modal.classList.add('open');
-}
+});
 
-// ─── CONFETTI ─────────────────────────────────────────────────────────────────
-function runConfetti(){
-  const canvas=document.getElementById('confetti-canvas');
-  const ctx=canvas.getContext('2d');
-  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
-  const pieces=[];
-  const colors=['#C4703A','#7B9E87','#E8A97A','#E8F0EB','#F5E6D8','#5C4F42'];
-  for(let i=0;i<120;i++){
-    pieces.push({
-      x:Math.random()*canvas.width,
-      y:-20-Math.random()*canvas.height,
-      w:6+Math.random()*8,h:4+Math.random()*6,
-      color:colors[Math.floor(Math.random()*colors.length)],
-      rot:Math.random()*360,
-      vx:(Math.random()-.5)*2,
-      vy:2+Math.random()*4,
-      vr:(Math.random()-.5)*6
-    });
+document.addEventListener('click', function(e){
+  var panel = document.getElementById('notif-panel');
+  var btn = document.getElementById('notif-btn');
+  if (state.notifOpen && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.classList.remove('open');
+    state.notifOpen = false;
   }
-  let frame=0;
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    pieces.forEach(p=>{
-      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);
-      ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
-      ctx.restore();
-      p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;
-    });
-    frame++;
-    if(frame<200)requestAnimationFrame(draw);
-    else ctx.clearRect(0,0,canvas.width,canvas.height);
-  }
-  draw();
-}
-
-// ─── STOPWATCH ────────────────────────────────────────────────────────────────
-let swMs=0,swRunning=false,swIv=null;
-function swTick(){swMs+=100;const cs=Math.floor(swMs/100)%10,s=Math.floor(swMs/1000)%60,m=Math.floor(swMs/60000);document.getElementById('sw-time').textContent=pad(m)+':'+pad(s)+'.'+cs}
-function pad(n){return String(n).padStart(2,'0')}
-function swStart(){if(swRunning)return;swRunning=true;swIv=setInterval(swTick,100);document.getElementById('sw-go').style.display='none';document.getElementById('sw-halt').style.display='inline-block'}
-function swStop(){clearInterval(swIv);swRunning=false;document.getElementById('sw-halt').style.display='none';document.getElementById('sw-go').style.display='inline-block'}
-function swReset(){swStop();swMs=0;document.getElementById('sw-time').textContent='00:00.0'}
-
-// ─── RICH TEXT ────────────────────────────────────────────────────────────────
-function fmt(cmd){document.getElementById('f-feedback').focus();document.execCommand(cmd,false,null)}
-function fmtHR(){document.getElementById('f-feedback').focus();document.execCommand('insertHTML',false,'<hr style="border:none;border-top:1px solid var(--border);margin:10px 0"/>');
-}
-function fmtCB(){document.getElementById('f-feedback').focus();document.execCommand('insertHTML',false,'<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><input type="checkbox" style="width:14px;height:14px;cursor:pointer;accent-color:var(--accent)"/><span> Item</span></div>')}
-
-// ─── TOAST ────────────────────────────────────────────────────────────────────
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-show('landing');
+});
 </script>
-</body>
-</html>
