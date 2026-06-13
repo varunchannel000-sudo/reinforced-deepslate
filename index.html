@@ -603,6 +603,7 @@ function renderParticipants(){
       </div>
       <div class="ap-btns">
         <button class="ap-btn" onclick="viewBallot('${p.id}')" title="View ballot">👁️</button>
+        <button class="ap-btn" onclick="deleteParticipant('${p.id}')" title="Delete participant">🗑️</button>
       </div>
     </div>`).join('');
 }
@@ -656,6 +657,18 @@ function viewBallot(id){
   document.getElementById('view-modal').classList.add('open');
 }
 function closeView(){document.getElementById('view-modal').classList.remove('open')}
+
+function deleteParticipant(id){
+  if(!confirm('Delete this participant and all associated records?')) return;
+
+  participants = participants.filter(p => p.id !== id);
+  finalists = finalists.filter(fid => fid !== id);
+  podiumMembers = podiumMembers.filter(pm => pm.id !== id);
+
+  persist();
+  refreshPortal();
+  toast('Participant deleted successfully!');
+}
 
 // ─── FINALS TAB ───────────────────────────────────────────────────────────────
 function renderFinalsTab(){
