@@ -479,17 +479,127 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <div class="toast" id="toast"></div>
 
 <script>
+// ─── FIREBASE CONFIG ──────────────────────────────────────────────────────────
+// To enable cross-account data persistence, set up Firebase:
+// 1. Go to https://console.firebase.google.com
+// 2. Create a new project (name it "debate-ballot-app")
+// 3. Enable Realtime Database (start in test mode for development)
+// 4. Copy your config from Project Settings and paste below
+// 5. Update this config object with your credentials
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBUwe-7-1sSR95tAa1Zd67yQ1uOT_GyZKs",
+  authDomain: "debateapp-1ce61.firebaseapp.com",
+  projectId: "debateapp-1ce61",
+  storageBucket: "debateapp-1ce61.firebasestorage.app",
+  messagingSenderId: "865093002998",
+  appId: "1:865093002998:web:cedfba6b9f83b78e9c6ed7"
+};
+
+let fbReady = false;
+let dbRef = null;
+
+// Try to initialize Firebase if config is provided
+function initFirebase(){
+  if(!firebaseConfig.projectId || firebaseConfig.projectId.includes('YOUR')) {
+    fbReady = false;
+    loadLocalStorage();
+    return;
+  }
+  
+  const script1 = document.createElement('script');
+  script1.src = 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+  script1.onload = () => {
+    const script2 = document.createElement('script');
+    script2.src = 'https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js';
+    script2.onload = () => {
+      try {
+        const {initializeApp} = window.firebase;
+        const {getDatabase} = window.firebase.database;
+        const app = initializeApp(firebaseConfig);
+        dbRef = getDatabase(app);
+        fbReady = true;
+        syncAllDataFromFirebase();
+      } catch(e) {
+        console.warn('Firebase init failed, using localStorage:', e.message);
+        fbReady = false;
+        loadLocalStorage();
+      }
+    };
+    document.head.appendChild(script2);
+  };
+  script1.onerror = () => {
+    fbReady = false;
+    loadLocalStorage();
+  };
+  document.head.appendChild(script1);
+}
+
 // ─── STATE ────────────────────────────────────────────────────────────────────
-let participants = JSON.parse(localStorage.getItem('sdb_v2')||'[]');
-let finalists = JSON.parse(localStorage.getItem('sdb_finals')||'[]');
-let podiumMembers = JSON.parse(localStorage.getItem('sdb_podium')||'[]');
+let participants = [];
+let finalists = [];
+let podiumMembers = [];
 let currentParticipant = null;
 
-function persist(){
-  localStorage.setItem('sdb_v2',JSON.stringify(participants));
-  localStorage.setItem('sdb_finals',JSON.stringify(finalists));
-  localStorage.setItem('sdb_podium',JSON.stringify(podiumMembers));
+function loadLocalStorage(){
+  participants = JSON.parse(localStorage.getItem('sdb_v2')||'[]');
+  finalists = JSON.parse(localStorage.getItem('sdb_finals')||'[]');
+  podiumMembers = JSON.parse(localStorage.getItem('sdb_podium')||'[]');
 }
+
+function syncAllDataFromFirebase(){
+  if(!fbReady || !dbRef) return;
+  
+  const {ref, onValue} = window.firebase.database;
+  
+  // Sync participants
+  onValue(ref(dbRef, 'data/participants'), (snapshot) => {
+    participants = snapshot.val() || [];
+    if(document.getElementById('page-participants')?.classList.contains('active')) {
+      renderParticipants();
+    }
+  }, () => {
+    loadLocalStorage();
+  });
+  
+  // Sync finalists
+  onValue(ref(dbRef, 'data/finalists'), (snapshot) => {
+    finalists = snapshot.val() || [];
+  }, () => {
+    finalists = JSON.parse(localStorage.getItem('sdb_finals')||'[]');
+  });
+  
+  // Sync podium
+  onValue(ref(dbRef, 'data/podium'), (snapshot) => {
+    podiumMembers = snapshot.val() || [];
+  }, () => {
+    podiumMembers = JSON.parse(localStorage.getItem('sdb_podium')||'[]');
+  });
+}
+
+function persist(){
+  // Save to localStorage as backup
+  localStorage.setItem('sdb_v2', JSON.stringify(participants));
+  localStorage.setItem('sdb_finals', JSON.stringify(finalists));
+  localStorage.setItem('sdb_podium', JSON.stringify(podiumMembers));
+  
+  // Save to Firebase if available
+  if(!fbReady || !dbRef) return;
+  
+  try {
+    const {ref, set} = window.firebase.database;
+    set(ref(dbRef, 'data/participants'), participants).catch(e=>console.error('Save error:', e));
+    set(ref(dbRef, 'data/finalists'), finalists).catch(e=>console.error('Save error:', e));
+    set(ref(dbRef, 'data/podium'), podiumMembers).catch(e=>console.error('Save error:', e));
+  } catch(e) {
+    console.warn('Firebase save failed, data saved to localStorage');
+  }
+}
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initFirebase, 100);
+});
 
 // ─── RATE OPTIONS ─────────────────────────────────────────────────────────────
 (()=>{const s=document.getElementById('f-rate');for(let i=1;i<=25;i++){const o=document.createElement('option');o.value=i;o.textContent=i;s.appendChild(o)}})();
@@ -603,7 +713,6 @@ function renderParticipants(){
       </div>
       <div class="ap-btns">
         <button class="ap-btn" onclick="viewBallot('${p.id}')" title="View ballot">👁️</button>
-        <button class="ap-btn" onclick="deleteParticipant('${p.id}')" title="Delete participant">🗑️</button>
       </div>
     </div>`).join('');
 }
@@ -658,18 +767,6 @@ function viewBallot(id){
 }
 function closeView(){document.getElementById('view-modal').classList.remove('open')}
 
-function deleteParticipant(id){
-  if(!confirm('Delete this participant and all associated records?')) return;
-
-  participants = participants.filter(p => p.id !== id);
-  finalists = finalists.filter(fid => fid !== id);
-  podiumMembers = podiumMembers.filter(pm => pm.id !== id);
-
-  persist();
-  refreshPortal();
-  toast('Participant deleted successfully!');
-}
-
 // ─── FINALS TAB ───────────────────────────────────────────────────────────────
 function renderFinalsTab(){
   const wrap=document.getElementById('finals-list-wrap');
@@ -712,6 +809,7 @@ function toggleFinalist(id){
       item.appendChild(badge);
     }
   }
+  persist();
 }
 
 function saveFinalists(){
@@ -798,6 +896,7 @@ function addPodiumMember(){
   if(!medal){alert('Please select a medal');return}
   if(!podiumMembers.find(x=>x.id===id)){
     podiumMembers.push({id,medal});
+    persist();
   }
   closeAddPodium();
   renderPodiumDisplay();
@@ -805,6 +904,7 @@ function addPodiumMember(){
 
 function removePodiumMember(id){
   podiumMembers=podiumMembers.filter(x=>x.id!==id);
+  persist();
   renderPodiumDisplay();
 }
 
